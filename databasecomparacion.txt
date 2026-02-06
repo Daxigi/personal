@@ -1,0 +1,307 @@
+## COMANDO ##
+
+
+root@debian:/var/www/postgres# cat > /tmp/comparar_registros.sh << 'EOF'
+#!/bin/bash
+
+echo "=== Obteniendo registros del servidor 200 ==="
+PGPASSWORD=09dgc06mcc psql -h 192.168.10.200 -U postgres -d bdSueldos -t -A -c "
+SELECT tablename, 
+       (xpath('/row/cnt/text()', xml_count))[1]::text::bigint as count
+FROM (
+    SELECT tablename, 
+           query_to_xml('SELECT COUNT(*) as cnt FROM public.' || quote_ident(tablename), false, true, '') as xml_count
+    FROM pg_tables 
+    WHERE schemaname = 'public'
+    ORDER BY tablename
+) t;" > /tmp/registros_200.txt
+
+echo "=== Obteniendo registros de la VPS ==="
+docker exec dbSueldos psql -U postgres -d bdsueldos -t -A -c "
+SELECT tablename, 
+       (xpath('/row/cnt/text()', xml_count))[1]::text::bigint as count
+FROM (
+    SELECT tablename, 
+           query_to_xml('SELECT COUNT(*) as cnt FROM public.' || quote_ident(tablename), false, true, '') as xml_count
+    FROM pg_tables 
+    WHERE schemaname = 'public'
+    ORDER BY tablename
+) t;" > /tmp/registros_vps.txt
+
+echo ""
+echo "=== COMPARACIÓN ==="
+echo "Formato: TABLA | 200 | VPS | DIFERENCIA"
+echo "----------------------------------------"
+
+# Combinar y comparar
+join -t'|' -a1 -a2 <(sort /tmp/registros_200.txt) <(sort /tmp/registros_vps.txt) | while IFS='|' read tabla cnt200 cntvps; do
+    cnt200=${cnt200:-0}
+    cntvps=${cntvps:-0}
+    diff=$((cntvps - cnt200))
+    if [ "$diff" -ne 0 ]; then
+        echo "❌ $tabla | $cnt200 | $cntvps | $diff"
+    else
+        echo "✅ $tabla | $cnt200 | $cntvps | OK"
+    fi
+done
+
+echo ""
+echo "=== RESUMEN ==="
+echo "Tablas en 200: $(wc -l < /tmp/registros_200.txt)"
+echo "Tablas en VPS: $(wc -l < /tmp/registros_vps.txt)"
+EOF
+
+chmod +x /tmp/comparar_registros.sh
+/tmp/comparar_registros.sh
+=== Obteniendo registros del servidor 200 ===
+=== Obteniendo registros de la VPS ===
+
+=== COMPARACIÓN ===
+Formato: TABLA | 200 | VPS | DIFERENCIA
+----------------------------------------
+✅ am_acta | 1 | 1 | OK
+✅ am_auditores | 5 | 5 | OK
+✅ am_certificados | 42009 | 42009 | OK
+✅ am_ical_diagnostico | 536 | 536 | OK
+✅ am_ical_diagnostico_nk | 0 | 0 | OK
+✅ am_medicos | 965 | 965 | OK
+✅ anx_rubros | 79 | 79 | OK
+✅ articulo_feria | 19 | 19 | OK
+✅ articulos | 43491 | 43491 | OK
+✅ articulos_neike | 10 | 10 | OK
+✅ as_articulos | 567 | 567 | OK
+✅ as_bio_error | 60 | 60 | OK
+✅ as_biometrico | 12 | 12 | OK
+✅ as_calendario_feriados | 217 | 217 | OK
+✅ as_certif | 132 | 132 | OK
+✅ as_compensa | 18 | 18 | OK
+✅ as_compensatorios | 11814 | 11814 | OK
+✅ as_corte_novedades | 3 | 3 | OK
+✅ as_dni_rechaz | 142400 | 142400 | OK
+✅ as_feria | 26045 | 26045 | OK
+✅ as_funcion | 7063 | 7063 | OK
+✅ as_grupo_carga_horaria | 353 | 353 | OK
+✅ as_grupo_carga_horaria_neike | 6 | 6 | OK
+✅ as_horas_extras | 29798 | 29798 | OK
+✅ as_legajo_gch | 10016 | 10016 | OK
+✅ as_legajo_gch_neike | 12 | 12 | OK
+✅ as_legajo_lis | 0 | 0 | OK
+✅ as_log | 20 | 20 | OK
+✅ as_log_biometricos | 1857 | 1857 | OK
+✅ as_normas_areas_uso | 14 | 14 | OK
+✅ as_notas | 48046 | 48046 | OK
+✅ as_notasneike | 6303 | 6303 | OK
+✅ as_notificaciones | 80 | 80 | OK
+✅ as_novedades | 1451402 | 1451402 | OK
+✅ as_novedades_neike | 57 | 57 | OK
+✅ as_nov_planillas | 15354 | 15354 | OK
+✅ as_nro_planillas | 193 | 193 | OK
+✅ as_oficial_salida | 84739 | 84739 | OK
+✅ as_ordenanzas | 47 | 47 | OK
+✅ as_ordenanzas_etiq | 5 | 5 | OK
+✅ as_ord_estados | 2 | 2 | OK
+✅ as_permiso_salida | 110514 | 110514 | OK
+✅ as_personal_autorizado_extras | 26 | 26 | OK
+✅ as_tardanzas | 9096 | 9096 | OK
+✅ as_tardanzas_planilla | 1923 | 1923 | OK
+✅ as_tardanzas_tj | 0 | 0 | OK
+✅ as_temp_cont | 26349 | 26349 | OK
+✅ as_temp_continuos | 854 | 854 | OK
+✅ as_temp_facial_b | 2180 | 2180 | OK
+✅ as_tipo_carga_horaria | 8 | 8 | OK
+✅ as_ubra | 1007695 | 1007695 | OK
+✅ as_ubra_neike | 134629 | 134629 | OK
+✅ as_unidades | 180 | 180 | OK
+✅ as_vacaciones | 21259 | 21259 | OK
+✅ bancos | 64 | 64 | OK
+✅ beneficio | 0 | 0 | OK
+✅ borrar | 0 | 0 | OK
+✅ calificaciones | 35754 | 35754 | OK
+✅ calificaciones_bk | 23753 | 23753 | OK
+✅ calif_periodos | 28 | 28 | OK
+✅ carga_institucion | 0 | 0 | OK
+✅ cobertura | 0 | 0 | OK
+✅ cobrabilidad | 15254 | 15254 | OK
+✅ concep_neike_temp | 0 | 0 | OK
+✅ concep_temp | 744 | 744 | OK
+✅ contratos | 923 | 923 | OK
+✅ errores_sql | 6 | 6 | OK
+✅ escala | 15 | 15 | OK
+✅ failed_jobs | 0 | 0 | OK
+✅ flights | 0 | 0 | OK
+✅ funcionarios | 215 | 215 | OK
+✅ ifcam_alumnos | 3417 | 3417 | OK
+✅ ifcam_asisalumno | 4347 | 4347 | OK
+✅ ifcam_asiscurso | 165 | 165 | OK
+✅ ifcam_cursos | 60 | 60 | OK
+✅ liq09 | 8079 | 8079 | OK
+✅ liq09_copy | 7306 | 7306 | OK
+✅ listado_personas | 381 | 381 | OK
+✅ log_liquidaciones | 169 | 169 | OK
+✅ lr9_failed_jobs | 0 | 0 | OK
+✅ lr9_migrations | 4 | 4 | OK
+✅ lr9_password_resets | 0 | 0 | OK
+✅ lr9_personal_access_tokens | 0 | 0 | OK
+✅ lr9_users | 0 | 0 | OK
+✅ maejub | 162 | 162 | OK
+✅ migrations | 5 | 5 | OK
+✅ neik01 | 5024 | 5024 | OK
+✅ neik02 | 3412 | 3412 | OK
+✅ neik03 | 8771 | 8771 | OK
+✅ neik04_monto | 3451 | 3451 | OK
+✅ neik05_certificacion | 36 | 36 | OK
+✅ neik06_conceptos_liquidacion | 8 | 8 | OK
+✅ neik07_adicionales | 294 | 294 | OK
+✅ neik08_embargos | 2 | 2 | OK
+✅ neik09_parametros | 1 | 1 | OK
+✅ neik10_liquidaciones | 18313 | 18313 | OK
+✅ neik11_fecha_cierre | 11 | 11 | OK
+✅ neik12_subcate | 3 | 3 | OK
+✅ neik14 | 1408 | 1408 | OK
+✅ neik15 | 2819 | 2819 | OK
+✅ neik21 | 41 | 41 | OK
+✅ neik22 | 41 | 41 | OK
+✅ neik29 | 0 | 0 | OK
+✅ neik55 | 3 | 3 | OK
+✅ neik99 | 310 | 310 | OK
+✅ neik99_tipo_ley | 3 | 3 | OK
+✅ nk_baja | 9 | 9 | OK
+✅ nk_certif | 7 | 7 | OK
+✅ password_resets | 0 | 0 | OK
+✅ per001 | 8540 | 8540 | OK
+✅ per002 | 4788 | 4788 | OK
+✅ per003 | 45655 | 45655 | OK
+✅ per004 | 14527 | 14527 | OK
+✅ per004_back_181 | 10298 | 10298 | OK
+✅ per005 | 10914 | 10914 | OK
+✅ per006 | 356 | 356 | OK
+✅ per007 | 0 | 0 | OK
+✅ per008 | 21 | 21 | OK
+✅ per009 | 164649 | 164649 | OK
+✅ per010 | 0 | 0 | OK
+✅ per050 | 8 | 8 | OK
+✅ per051 | 9 | 9 | OK
+✅ per052 | 5 | 5 | OK
+✅ per053 | 5 | 5 | OK
+✅ per054 | 7 | 7 | OK
+✅ per055 | 37 | 37 | OK
+✅ per056 | 275 | 275 | OK
+✅ per057 | 2 | 2 | OK
+✅ per058 | 0 | 0 | OK
+✅ per059 | 20 | 20 | OK
+✅ per060 | 14 | 14 | OK
+✅ per061 | 5 | 5 | OK
+✅ per062 | 3 | 3 | OK
+✅ per063 | 16 | 16 | OK
+✅ per064 | 10 | 10 | OK
+✅ per065 | 0 | 0 | OK
+✅ per066 | 0 | 0 | OK
+✅ per067 | 3 | 3 | OK
+✅ per068 | 3 | 3 | OK
+✅ per069 | 91 | 91 | OK
+✅ per070 | 4 | 4 | OK
+✅ per_doc_legajos | 4 | 4 | OK
+✅ per_doc_subtema | 3 | 3 | OK
+✅ per_doc_tema | 4 | 4 | OK
+✅ per_documentacion | 4 | 4 | OK
+✅ per_neike | 13645 | 13645 | OK
+✅ personal_access_tokens | 0 | 0 | OK
+✅ personas_benefi | 0 | 0 | OK
+✅ per_tipo_liq | 148 | 148 | OK
+✅ puntos_gps_unidades | 261 | 261 | OK
+✅ recibos_sueldos | 202115 | 202115 | OK
+✅ relev01 | 3834 | 3834 | OK
+✅ renovacion | 0 | 0 | OK
+✅ resultado1 | 0 | 0 | OK
+✅ scm001 | 10587 | 10587 | OK
+✅ scm001_cmp_actual | 1 | 1 | OK
+✅ scm001_concejo_actual | 1 | 1 | OK
+✅ scm001_her | 10587 | 10587 | OK
+✅ scm001_rel | 637 | 637 | OK
+✅ scm001_ubi_anexo | 147 | 147 | OK
+✅ scm001_ubi_anexo_tipo | 13 | 13 | OK
+✅ scm002 | 4 | 4 | OK
+✅ scm003 | 158 | 158 | OK
+✅ scm004 | 4901 | 4901 | OK
+✅ scm004_aux | 261 | 261 | OK
+✅ scm005 | 6 | 6 | OK
+✅ scm006 | 26 | 26 | OK
+✅ scm007 | 2385 | 2385 | OK
+✅ sc_niv_educativo | 10 | 10 | OK
+✅ sem001 | 4695 | 4695 | OK
+✅ sem001_b | 567 | 567 | OK
+✅ sem002 | 437 | 437 | OK
+✅ sem003 | 581 | 581 | OK
+✅ sem004 | 42321 | 42321 | OK
+✅ sem005 | 676 | 676 | OK
+✅ sem006 | 0 | 0 | OK
+✅ sem007 | 0 | 0 | OK
+✅ slogan | 1 | 1 | OK
+✅ sorteo | 2315 | 2315 | OK
+❌ spatial_ref_sys | 8500 | 0 | -8500
+✅ subrogancia | 2 | 2 | OK
+✅ sue001 | 3816 | 3816 | OK
+✅ sue003 | 314 | 314 | OK
+✅ sue004 | 2876 | 2876 | OK
+✅ sue005 | 202086 | 202086 | OK
+✅ sue005_b | 60382 | 60382 | OK
+✅ sue006 | 46 | 46 | OK
+✅ sue007 | 28 | 28 | OK
+✅ sue009 | 12 | 12 | OK
+✅ sue010 | 6 | 6 | OK
+✅ sue011 | 105 | 105 | OK
+✅ sue012 | 537 | 537 | OK
+✅ sue013 | 8 | 8 | OK
+✅ sue013_b | 6 | 6 | OK
+✅ sue014 | 831284 | 831284 | OK
+✅ sue014_b | 224 | 224 | OK
+✅ sue015 | 8059647 | 8059647 | OK
+✅ sue015_b | 3779 | 3779 | OK
+✅ sue015_temp | 7060 | 7060 | OK
+✅ sue016 | 4 | 4 | OK
+✅ sue017 | 246 | 246 | OK
+✅ sue018 | 48 | 48 | OK
+✅ sue019 | 27 | 27 | OK
+✅ sue020 | 83 | 83 | OK
+✅ sue021 | 30964 | 30964 | OK
+✅ sue022 | 194 | 194 | OK
+✅ sue023 | 63941 | 63941 | OK
+✅ sue024 | 1876 | 1876 | OK
+✅ sue025 | 79 | 79 | OK
+✅ sue026 | 6 | 6 | OK
+✅ sue028 | 20 | 20 | OK
+✅ sue029 | 6432 | 6432 | OK
+✅ sue029_copy | 5739 | 5739 | OK
+✅ sue030 | 757 | 757 | OK
+✅ sue031 | 292 | 292 | OK
+✅ sue032 | 2 | 2 | OK
+✅ sue033 | 70532 | 70532 | OK
+✅ sue034 | 1 | 1 | OK
+✅ sue035 | 4186 | 4186 | OK
+✅ sue036 | 538 | 538 | OK
+✅ sue037 | 1 | 1 | OK
+✅ sue038 | 18 | 18 | OK
+✅ sue039 | 840 | 840 | OK
+✅ sue040 | 72 | 72 | OK
+✅ sue040_old | 14 | 14 | OK
+✅ sue041 | 624 | 624 | OK
+✅ sue041_old | 92 | 92 | OK
+✅ sue042 | 16 | 16 | OK
+✅ sue044 | 166 | 166 | OK
+✅ sue045 | 24 | 24 | OK
+✅ sue046 | 2 | 2 | OK
+✅ sue054 | 5576 | 5576 | OK
+✅ sue055 | 97965 | 97965 | OK
+✅ sue066 | 4971 | 4971 | OK
+✅ suefuncion | 739 | 739 | OK
+✅ suenros | 209 | 209 | OK
+✅ sueoperador | 6 | 6 | OK
+✅ tabla1 | 141 | 141 | OK
+✅ tipo_documentacion | 0 | 0 | OK
+✅ tmp_pp | 359 | 359 | OK
+✅ users | 0 | 0 | OK
+
+=== RESUMEN ===
+Tablas en 200: 240
+Tablas en VPS: 241
+ro
