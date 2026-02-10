@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Personal\LegajoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -12,7 +13,7 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 // Personal
-Route::get('/personal/legajos', fn () => Inertia::render('Personal/Legajos'))->name('personal.legajos');
+Route::get('/personal/legajos', [LegajoController::class, 'index'])->name('personal.legajos');
 Route::get('/personal/contratos', fn () => Inertia::render('Personal/Contratos'))->name('personal.contratos');
 Route::get('/personal/listados', fn () => Inertia::render('Personal/Listados'))->name('personal.listados');
 

@@ -1,66 +1,65 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import DataTable from '@/components/DataTable.vue'
-import type { Column } from '@/components/DataTable.vue'
-import SearchFilter from '@/components/SearchFilter.vue'
+import DataTable from '@/components/patterns/DataTable.vue'
+import type { Column } from '@/components/patterns/DataTable.vue'
+import TabbedPanel from '@/components/patterns/TabbedPanel.vue'
+import FormPanel from '@/components/patterns/FormPanel.vue'
+import FormField from '@/components/patterns/FormField.vue'
 
-const filtro = ref('')
-const sortKey = ref('')
-const sortAsc = ref(true)
+interface Legajo {
+    legajo: number
+    documento: number
+    cuit1: number | null
+    cuit2: number | null
+    apellidoNombre: string
+    fechaNacimiento: string | null
+    fechaAlta: string | null
+    sexo: string
+    [key: string]: unknown
+}
+
+const props = defineProps<{
+    legajos: Legajo[]
+}>()
+
+const isCreating = ref(false)
+
+const tabs = [
+    { key: 'datos_personales', label: 'Datos Personales' },
+    { key: 'antiguedades', label: 'Antiguedades' },
+    { key: 'estudios', label: 'Estudios' },
+    { key: 'antecedentes', label: 'Antecedentes Laborales' },
+    { key: 'relaciones', label: 'Relaciones' },
+    { key: 'certificados', label: 'Certificados' },
+    { key: 'adicionales', label: 'Adicionales' },
+    { key: 'novedades', label: 'Novedades' },
+    { key: 'seguros', label: 'Seguros' },
+    { key: 'sit_revista', label: 'Sit. Revista' },
+    { key: 'asiste', label: 'Asiste' },
+]
 
 const columns: Column[] = [
     { key: 'legajo', label: 'Legajo', sortable: true },
     { key: 'cuil', label: 'CUIL' },
     { key: 'apellidoNombre', label: 'Apellido y Nombres', sortable: true },
     { key: 'fechaNacimiento', label: 'Fecha de Nacimiento' },
-    { key: 'genero', label: 'Género' },
+    { key: 'fechaAlta', label: 'Fecha de Alta', sortable: true },
+    { key: 'sexo', label: 'Sexo' },
 ]
 
-const legajos = [
-    { legajo: 1001, cuil: '20-12345678-9', apellidoNombre: 'García, Juan Carlos', fechaNacimiento: '15/03/1980', genero: 'M' },
-    { legajo: 1002, cuil: '27-23456789-0', apellidoNombre: 'López, María Elena', fechaNacimiento: '22/07/1985', genero: 'F' },
-    { legajo: 1003, cuil: '20-34567890-1', apellidoNombre: 'Martínez, Pedro Alberto', fechaNacimiento: '10/11/1975', genero: 'M' },
-    { legajo: 1004, cuil: '27-45678901-2', apellidoNombre: 'Rodríguez, Ana Laura', fechaNacimiento: '05/09/1990', genero: 'F' },
-    { legajo: 1005, cuil: '20-56789012-3', apellidoNombre: 'Fernández, Diego Martín', fechaNacimiento: '18/01/1988', genero: 'M' },
-    { legajo: 1006, cuil: '27-67890123-4', apellidoNombre: 'González, Lucía Beatriz', fechaNacimiento: '30/06/1982', genero: 'F' },
-    { legajo: 1007, cuil: '20-78901234-5', apellidoNombre: 'Pérez, Roberto Carlos', fechaNacimiento: '12/12/1970', genero: 'M' },
-    { legajo: 1008, cuil: '27-89012345-6', apellidoNombre: 'Sánchez, Carolina Inés', fechaNacimiento: '25/04/1993', genero: 'F' },
-]
+function handleAgregar() {
+    isCreating.value = true
+}
 
-const filteredData = computed(() => {
-    let result = [...legajos]
+function handleCancelCreate() {
+    isCreating.value = false
+}
 
-    if (filtro.value) {
-        const term = filtro.value.toLowerCase()
-        result = result.filter((row) =>
-            row.apellidoNombre.toLowerCase().includes(term)
-            || row.cuil.includes(term)
-            || String(row.legajo).includes(term)
-        )
-    }
-
-    if (sortKey.value) {
-        result.sort((a, b) => {
-            const valA = a[sortKey.value as keyof typeof a]
-            const valB = b[sortKey.value as keyof typeof b]
-            if (valA < valB) return sortAsc.value ? -1 : 1
-            if (valA > valB) return sortAsc.value ? 1 : -1
-            return 0
-        })
-    }
-
-    return result
-})
-
-function handleSort(column: string) {
-    if (sortKey.value === column) {
-        sortAsc.value = !sortAsc.value
-    } else {
-        sortKey.value = column
-        sortAsc.value = true
-    }
+function handleSubmit() {
+    console.log('Guardando legajo...')
+    isCreating.value = false
 }
 </script>
 
@@ -68,26 +67,111 @@ function handleSort(column: string) {
     <Head title="Legajos - Altas y Modificaciones" />
 
     <AuthenticatedLayout>
-        <DataTable :columns="columns" :data="filteredData" row-key="legajo" @sort="handleSort">
-            <template #header>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-lg font-bold text-gray-800">Legajos</h1>
-                        <SearchFilter v-model="filtro" placeholder="Filtrar legajos..." class="w-64" />
-                    </div>
+        <div class="max-w-5xl mx-auto my-6 px-4 sm:px-6">
+
+            <div v-if="isCreating">
+                <div class="mb-4">
                     <button
-                        class="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        @click="handleCancelCreate"
+                        class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                     >
-                        + Agregar
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Volver al listado
                     </button>
                 </div>
-            </template>
 
-            <template #actions>
-                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                    Ver
-                </button>
-            </template>
-        </DataTable>
+                <TabbedPanel :tabs="tabs" title="Nuevo Legajo">
+                    <template #datos_personales>
+                        <FormPanel
+                            title="Datos Básicos"
+                            @submit="handleSubmit"
+                            @cancel="handleCancelCreate"
+                        >
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField label="Apellido y Nombre" type="text" required />
+                                <FormField label="Documento" type="number" />
+                                <FormField label="CUIL (Prefijo)" type="number" />
+                                <FormField label="CUIL (Sufijo)" type="number" />
+                                <FormField label="Fecha Nacimiento" type="date" />
+                                <FormField
+                                    label="Sexo"
+                                    type="select"
+                                    placeholder="Seleccionar"
+                                    :options="[
+                                        { value: 'M', label: 'Masculino' },
+                                        { value: 'F', label: 'Femenino' },
+                                    ]"
+                                />
+                            </div>
+                        </FormPanel>
+                    </template>
+
+                    <template #antiguedades>
+                        <p class="text-gray-500 italic">Contenido de Antigüedades pendiente...</p>
+                    </template>
+                    <template #estudios>
+                        <p class="text-gray-500 italic">Contenido de Estudios pendiente...</p>
+                    </template>
+                    <template #antecedentes>
+                        <p class="text-gray-500 italic">Contenido de Antecedentes Laborales pendiente...</p>
+                    </template>
+                    <template #relaciones>
+                        <p class="text-gray-500 italic">Contenido de Relaciones pendiente...</p>
+                    </template>
+                    <template #certificados>
+                        <p class="text-gray-500 italic">Contenido de Certificados pendiente...</p>
+                    </template>
+                    <template #adicionales>
+                        <p class="text-gray-500 italic">Contenido de Adicionales pendiente...</p>
+                    </template>
+                    <template #novedades>
+                        <p class="text-gray-500 italic">Contenido de Novedades pendiente...</p>
+                    </template>
+                    <template #seguros>
+                        <p class="text-gray-500 italic">Contenido de Seguros pendiente...</p>
+                    </template>
+                    <template #sit_revista>
+                        <p class="text-gray-500 italic">Contenido de Sit. Revista pendiente...</p>
+                    </template>
+                    <template #asiste>
+                        <p class="text-gray-500 italic">Contenido de Asiste pendiente...</p>
+                    </template>
+                </TabbedPanel>
+            </div>
+
+            <DataTable
+                v-else
+                title="Legajos"
+                add-label="Agregar"
+                :columns="columns"
+                :data="legajos"
+                row-key="legajo"
+                :pagination="true"
+                :items-per-page="50"
+                search-placeholder="Filtrar legajos..."
+                @add="handleAgregar"
+            >
+                <template #cell="{ column, row, value }">
+                    <span v-if="column.key === 'cuil'">
+                        {{ row.cuit1 }}-{{ row.documento }}-{{ row.cuit2 }}
+                    </span>
+                    <span v-else>
+                        {{ value }}
+                    </span>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center justify-end">
+                        <button class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors" title="Ver detalle">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </DataTable>
+        </div>
     </AuthenticatedLayout>
 </template>
