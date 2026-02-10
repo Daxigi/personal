@@ -64,26 +64,26 @@ const model = defineModel<string | number | null>()
 .ff-label {
     font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: var(--color-text-secondary);
     line-height: 1;
     padding-bottom: 2px;
 }
 
 .ff-required {
-    color: #ef4444;
+    color: var(--color-error);
     margin-left: 2px;
 }
 
 .ff-error {
     font-size: 12px;
-    color: #ef4444;
+    color: var(--color-error);
     margin: 0;
     line-height: 1.3;
 }
 
 .ff-hint {
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--color-border-secondary-hover);
     margin: 0;
     line-height: 1.3;
 }
@@ -91,11 +91,11 @@ const model = defineModel<string | number | null>()
 /* Error state — tint the inner input/select border */
 .ff-field--error :deep(.ai-input),
 .ff-field--error :deep(.as-select) {
-    border-color: #fca5a5;
+    border-color: var(--color-error-light);
 }
 .ff-field--error :deep(.ai-input):focus,
 .ff-field--error :deep(.as-select):focus {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px var(--shadow-focus-error);
 }
 </style>

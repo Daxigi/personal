@@ -44,24 +44,24 @@ const emit = defineEmits<{
 
 <style scoped>
 .fp-card {
-    background: #ffffff;
-    border: 1px solid #dfe3ea;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     overflow: hidden;
     box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        0 4px 16px rgba(0, 0, 0, 0.025);
+        0 1px 3px var(--shadow-card-sm),
+        0 4px 16px var(--shadow-card-lg);
 }
 
 .fp-header {
     padding: 18px 24px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 .fp-title {
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--color-text-heading);
     margin: 0;
     letter-spacing: -0.01em;
 }
@@ -79,7 +79,7 @@ const emit = defineEmits<{
     justify-content: flex-end;
     gap: 10px;
     padding-top: 16px;
-    border-top: 1px solid #eef1f5;
+    border-top: 1px solid var(--color-border-lighter);
 }
 
 .fp-btn {
@@ -98,30 +98,30 @@ const emit = defineEmits<{
 }
 
 .fp-btn--cancel {
-    color: #374151;
-    background: #ffffff;
-    border-color: #d1d5db;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border-color: var(--color-border-secondary);
 }
 .fp-btn--cancel:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: var(--color-surface-muted);
+    border-color: var(--color-border-secondary-hover);
 }
 
 .fp-btn--submit {
-    color: #ffffff;
-    background: #3b82f6;
-    border-color: #3b82f6;
-    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.25);
+    color: var(--color-surface);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 1px 2px var(--shadow-primary-sm);
 }
 .fp-btn--submit:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    box-shadow: 0 2px 6px var(--shadow-primary-md);
 }
 
 .fp-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 3px var(--shadow-focus-ring);
 }
 
 @media (max-width: 640px) {

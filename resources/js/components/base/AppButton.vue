@@ -43,55 +43,55 @@ withDefaults(defineProps<{
 
 /* Primary */
 .ab-btn--primary {
-    color: #ffffff;
-    background: #3b82f6;
-    border-color: #3b82f6;
-    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.25);
+    color: var(--color-surface);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 1px 2px var(--shadow-primary-sm);
 }
 .ab-btn--primary:hover:not(:disabled) {
-    background: #2563eb;
-    border-color: #2563eb;
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    box-shadow: 0 2px 6px var(--shadow-primary-md);
 }
 .ab-btn--primary:active:not(:disabled) {
-    background: #1d4ed8;
+    background: var(--color-primary-active);
     transform: translateY(0.5px);
 }
 
 /* Secondary */
 .ab-btn--secondary {
-    color: #374151;
-    background: #ffffff;
-    border-color: #d1d5db;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border-color: var(--color-border-secondary);
 }
 .ab-btn--secondary:hover:not(:disabled) {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: var(--color-surface-muted);
+    border-color: var(--color-border-secondary-hover);
 }
 .ab-btn--secondary:active:not(:disabled) {
-    background: #f3f4f6;
+    background: var(--color-surface-subtle);
     transform: translateY(0.5px);
 }
 
 /* Ghost */
 .ab-btn--ghost {
-    color: #6b7280;
+    color: var(--color-text-muted);
     background: transparent;
     border-color: transparent;
 }
 .ab-btn--ghost:hover:not(:disabled) {
-    color: #374151;
-    background: #f3f4f6;
+    color: var(--color-text-secondary);
+    background: var(--color-surface-subtle);
 }
 .ab-btn--ghost:active:not(:disabled) {
-    background: #e5e7eb;
+    background: var(--color-border-light);
     transform: translateY(0.5px);
 }
 
 /* Focus ring (all variants) */
 .ab-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 3px var(--shadow-focus-ring);
 }
 
 /* Disabled */

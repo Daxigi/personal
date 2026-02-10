@@ -43,7 +43,7 @@ const model = defineModel<string>({ default: '' })
     left: 11px;
     width: 15px;
     height: 15px;
-    color: #94a0b4;
+    color: var(--color-text-icon);
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -58,24 +58,24 @@ const model = defineModel<string>({ default: '' })
     height: 36px;
     padding: 0 30px 0 34px;
     font-size: 13px;
-    color: #1f2937;
-    background: #f4f5f8;
-    border: 1.5px solid #e0e4ea;
+    color: var(--color-text-default);
+    background: var(--color-surface-input);
+    border: 1.5px solid var(--color-border-input);
     border-radius: 8px;
     outline: none;
     transition: all 0.15s ease;
 }
 .sf-input::placeholder {
-    color: #a3aab8;
+    color: var(--color-text-placeholder);
 }
 .sf-input:hover {
-    border-color: #c5cbd5;
-    background: #eff0f4;
+    border-color: var(--color-border-input-hover);
+    background: var(--color-surface-input-hover);
 }
 .sf-input:focus {
-    background: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
 }
 
 .sf-clear {

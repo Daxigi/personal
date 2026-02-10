@@ -45,9 +45,9 @@ const model = defineModel<string | number | null>()
     height: 36px;
     padding: 0 32px 0 12px;
     font-size: 13.5px;
-    color: #1f2937;
-    background: #f4f5f8;
-    border: 1.5px solid #e0e4ea;
+    color: var(--color-text-default);
+    background: var(--color-surface-input);
+    border: 1.5px solid var(--color-border-input);
     border-radius: 6px;
     outline: none;
     transition: all 0.15s ease;
@@ -60,18 +60,18 @@ const model = defineModel<string | number | null>()
 }
 
 .as-select--placeholder {
-    color: #a3aab8;
+    color: var(--color-text-placeholder);
 }
 
 .as-select:hover:not(:disabled) {
-    border-color: #c5cbd5;
-    background-color: #eff0f4;
+    border-color: var(--color-border-input-hover);
+    background-color: var(--color-surface-input-hover);
 }
 
 .as-select:focus:not(:disabled) {
-    background-color: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    background-color: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
 }
 
 .as-select--disabled {

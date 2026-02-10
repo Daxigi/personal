@@ -340,13 +340,13 @@ function goToPage(page: number | string) {
 
 /* ─── Card wrapper ─── */
 .dt-card {
-    background: #ffffff;
-    border: 1px solid #dfe3ea;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     overflow: hidden;
     box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        0 4px 16px rgba(0, 0, 0, 0.025);
+        0 1px 3px var(--shadow-card-sm),
+        0 4px 16px var(--shadow-card-lg);
 }
 
 /* ─── Header ─── */
@@ -365,7 +365,7 @@ function goToPage(page: number | string) {
 .dt-title {
     font-size: 17px;
     font-weight: 700;
-    color: #111827;
+    color: var(--color-text-heading);
     margin: 0;
     letter-spacing: -0.015em;
     white-space: nowrap;
@@ -390,7 +390,7 @@ function goToPage(page: number | string) {
     left: 11px;
     width: 15px;
     height: 15px;
-    color: #94a0b4;
+    color: var(--color-text-icon);
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -402,22 +402,22 @@ function goToPage(page: number | string) {
     height: 36px;
     padding: 0 30px 0 34px;
     font-size: 13px;
-    color: #1f2937;
-    background: #f4f5f8;
-    border: 1.5px solid #e0e4ea;
+    color: var(--color-text-default);
+    background: var(--color-surface-input);
+    border: 1.5px solid var(--color-border-input);
     border-radius: 8px;
     outline: none;
     transition: all 0.2s ease;
 }
-.dt-search-input::placeholder { color: #a3aab8; }
+.dt-search-input::placeholder { color: var(--color-text-placeholder); }
 .dt-search-input:hover {
-    border-color: #c5cbd5;
-    background: #eff0f4;
+    border-color: var(--color-border-input-hover);
+    background: var(--color-surface-input-hover);
 }
 .dt-search-input:focus {
-    background: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
 }
 
 .dt-search-clear {
@@ -451,21 +451,21 @@ function goToPage(page: number | string) {
     padding: 0 16px;
     font-size: 13px;
     font-weight: 600;
-    color: #ffffff;
-    background: #3b82f6;
+    color: var(--color-surface);
+    background: var(--color-primary);
     border: none;
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.15s ease;
-    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 1px 2px var(--shadow-primary-sm);
 }
 .dt-add-btn:hover {
-    background: #2563eb;
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.35);
+    background: var(--color-primary-hover);
+    box-shadow: 0 2px 6px var(--shadow-primary-md);
 }
 .dt-add-btn:active {
-    background: #1d4ed8;
+    background: var(--color-primary-active);
     transform: translateY(0.5px);
 }
 .dt-add-icon { width: 16px; height: 16px; }
@@ -478,7 +478,7 @@ function goToPage(page: number | string) {
 .dt-table-scroll {
     overflow-x: auto;
     overflow-y: auto;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-border-light);
     border-radius: 6px;
     max-height: 600px; /* Aprox 10 rows + header */
 }
@@ -495,11 +495,11 @@ function goToPage(page: number | string) {
     padding: 10px 18px;
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--color-text-table-head);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background: #f1f5f9;
-    border-bottom: 2px solid #e2e8f0;
+    background: var(--color-surface-table-head);
+    border-bottom: 2px solid var(--color-border-table-head);
     white-space: nowrap;
     user-select: none;
     position: sticky;
@@ -512,8 +512,8 @@ function goToPage(page: number | string) {
     transition: background 0.15s, color 0.15s;
 }
 .dt-th--sortable:hover {
-    background: #e2e8f0;
-    color: #1e40af;
+    background: var(--color-border-table-head);
+    color: var(--color-primary-dark);
 }
 
 .dt-th--actions {
@@ -540,7 +540,7 @@ function goToPage(page: number | string) {
 
 .dt-sort-neutral { opacity: 0.3; transition: opacity 0.15s; }
 .dt-th--sortable:hover .dt-sort-neutral { opacity: 0.55; }
-.dt-sort-active { color: #1e40af; opacity: 1; }
+.dt-sort-active { color: var(--color-primary-dark); opacity: 1; }
 
 /* ─── Table rows ─── */
 .dt-row {
@@ -548,15 +548,15 @@ function goToPage(page: number | string) {
 }
 
 .dt-row--striped {
-    background: #f8fafc;
+    background: var(--color-surface-striped);
 }
 
 .dt-row:hover {
-    background: #eff6ff;
+    background: var(--color-primary-bg);
 }
 
 .dt-row .dt-td {
-    border-bottom: 1px solid #f1f3f5;
+    border-bottom: 1px solid var(--color-border-row);
 }
 .dt-row:last-child .dt-td {
     border-bottom: none;
@@ -566,7 +566,7 @@ function goToPage(page: number | string) {
 .dt-td {
     padding: 10px 18px;
     font-size: 13.5px;
-    color: #1e293b;
+    color: var(--color-text-body);
     line-height: 1.45;
     font-weight: 500;
 }
@@ -600,7 +600,7 @@ function goToPage(page: number | string) {
 .dt-empty-text {
     font-size: 14px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--color-text-table-head);
     margin: 0;
 }
 .dt-empty-sub {
@@ -612,8 +612,8 @@ function goToPage(page: number | string) {
 /* ─── Footer ─── */
 .dt-footer {
     padding: 12px 24px;
-    border-top: 1px solid #eef1f5;
-    background: #fafbfd;
+    border-top: 1px solid var(--color-border-lighter);
+    background: var(--color-surface-footer);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -622,7 +622,7 @@ function goToPage(page: number | string) {
 
 .dt-footer-info {
     font-size: 12.5px;
-    color: #7c8595;
+    color: var(--color-text-footer);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
@@ -653,20 +653,20 @@ function goToPage(page: number | string) {
 }
 
 .dt-pg-btn:hover:not(:disabled):not(.dt-pg-btn--active) {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: var(--color-surface-table-head);
+    color: var(--color-text-body);
 }
 
 .dt-pg-btn--active {
-    background: #3b82f6;
-    color: #ffffff;
-    border-color: #3b82f6;
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    background: var(--color-primary);
+    color: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 1px 3px var(--shadow-focus-ring);
     font-weight: 600;
 }
 
 .dt-pg-nav {
-    color: #64748b;
+    color: var(--color-text-table-head);
 }
 .dt-pg-nav svg { width: 16px; height: 16px; }
 

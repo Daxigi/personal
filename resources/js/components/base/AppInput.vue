@@ -35,9 +35,9 @@ const model = defineModel<string | number | null>()
     height: 36px;
     padding: 0 12px;
     font-size: 13.5px;
-    color: #1f2937;
-    background: #f4f5f8;
-    border: 1.5px solid #e0e4ea;
+    color: var(--color-text-default);
+    background: var(--color-surface-input);
+    border: 1.5px solid var(--color-border-input);
     border-radius: 6px;
     outline: none;
     transition: all 0.15s ease;
@@ -45,18 +45,18 @@ const model = defineModel<string | number | null>()
 }
 
 .ai-input::placeholder {
-    color: #a3aab8;
+    color: var(--color-text-placeholder);
 }
 
 .ai-input:hover:not(:disabled):not(:read-only) {
-    border-color: #c5cbd5;
-    background: #eff0f4;
+    border-color: var(--color-border-input-hover);
+    background: var(--color-surface-input-hover);
 }
 
 .ai-input:focus:not(:disabled):not(:read-only) {
-    background: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
 }
 
 .ai-input--disabled {
@@ -65,7 +65,7 @@ const model = defineModel<string | number | null>()
 }
 
 .ai-input--readonly {
-    background: #f9fafb;
+    background: var(--color-surface-muted);
     cursor: default;
 }
 </style>

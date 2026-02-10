@@ -147,13 +147,13 @@ function selectTab(tab: Tab) {
 
 /* ─── Card ─── */
 .tp-card {
-    background: #ffffff;
-    border: 1px solid #dfe3ea;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     overflow: hidden;
     box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        0 4px 16px rgba(0, 0, 0, 0.025);
+        0 1px 3px var(--shadow-card-sm),
+        0 4px 16px var(--shadow-card-lg);
 }
 
 /* ─── Header (opcional, para título + acciones) ─── */
@@ -168,7 +168,7 @@ function selectTab(tab: Tab) {
 .tp-title {
     font-size: 17px;
     font-weight: 700;
-    color: #111827;
+    color: var(--color-text-heading);
     margin: 0;
     letter-spacing: -0.015em;
 }
@@ -182,7 +182,7 @@ function selectTab(tab: Tab) {
 /* ─── Tabs wrapper (contiene scroll + nav) ─── */
 .tp-tabs-wrapper {
     position: relative;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 /* ─── Scroll buttons ─── */
@@ -194,20 +194,20 @@ function selectTab(tab: Tab) {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(to right, #fff 60%, transparent);
+    background: linear-gradient(to right, var(--color-surface) 60%, transparent);
     border: none;
     cursor: pointer;
     z-index: 2;
-    color: #6b7280;
+    color: var(--color-text-muted);
     padding: 0;
     transition: color 0.15s;
 }
-.tp-scroll-btn:hover { color: #1f2937; }
+.tp-scroll-btn:hover { color: var(--color-text-default); }
 .tp-scroll-btn--left { left: 0; padding-left: 4px; }
 .tp-scroll-btn--right {
     right: 0;
     padding-right: 4px;
-    background: linear-gradient(to left, #fff 60%, transparent);
+    background: linear-gradient(to left, var(--color-surface) 60%, transparent);
 }
 .tp-scroll-btn svg { width: 16px; height: 16px; }
 
@@ -230,7 +230,7 @@ function selectTab(tab: Tab) {
     padding: 12px 16px;
     font-size: 13.5px;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--color-text-muted);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
@@ -242,18 +242,18 @@ function selectTab(tab: Tab) {
 }
 
 .tp-tab:hover:not(.tp-tab--active):not(.tp-tab--disabled) {
-    color: #374151;
-    border-bottom-color: #d1d5db;
+    color: var(--color-text-secondary);
+    border-bottom-color: var(--color-border-secondary);
 }
 
 .tp-tab--active {
-    color: #2563eb;
-    border-bottom-color: #2563eb;
+    color: var(--color-primary-hover);
+    border-bottom-color: var(--color-primary-hover);
     font-weight: 600;
 }
 
 .tp-tab--disabled {
-    color: #c4c9d4;
+    color: var(--color-text-disabled);
     cursor: not-allowed;
 }
 
@@ -273,14 +273,14 @@ function selectTab(tab: Tab) {
     font-weight: 600;
     line-height: 1;
     border-radius: 9px;
-    background: #e5e7eb;
+    background: var(--color-border-light);
     color: #4b5563;
     font-variant-numeric: tabular-nums;
 }
 
 .tp-tab--active .tp-tab-badge {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--color-primary-light);
+    color: var(--color-primary-active);
 }
 
 /* ─── Panel content ─── */
@@ -309,8 +309,8 @@ function selectTab(tab: Tab) {
     justify-content: flex-end;
     gap: 10px;
     padding: 14px 24px;
-    border-top: 1px solid #eef1f5;
-    background: #fafbfd;
+    border-top: 1px solid var(--color-border-lighter);
+    background: var(--color-surface-footer);
 }
 
 /* ─── Responsive ─── */
