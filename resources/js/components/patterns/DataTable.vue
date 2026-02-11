@@ -486,6 +486,7 @@ function goToPage(page: number | string) {
 /* ─── Table ─── */
 .dt-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: separate; /* Required for sticky header border */
     border-spacing: 0;
 }
@@ -517,7 +518,7 @@ function goToPage(page: number | string) {
 }
 
 .dt-th--actions {
-    width: 1%;
+    width: 80px;
     color: var(--color-text-placeholder);
     font-weight: var(--font-weight-semibold);
 }

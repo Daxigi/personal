@@ -15,7 +15,7 @@ interface Legajo {
     cuit2: number | null
     apellidoNombre: string
     fechaNacimiento: string | null
-    fechaAlta: string | null
+    // fechaAlta: string | null
     sexo: string
     [key: string]: unknown
 }
@@ -133,13 +133,13 @@ const tabs = [
 ]
 
 const columns: Column[] = [
-    { key: 'legajo', label: 'Legajo', sortable: true },
-    { key: 'cuil', label: 'CUIL' },
-    { key: 'apellidoNombre', label: 'Apellido y Nombres', sortable: true },
-    { key: 'fechaNacimiento', label: 'Fecha de Nacimiento' },
-    { key: 'fechaAlta', label: 'Fecha de Alta', sortable: true },
-    { key: 'sexo', label: 'Sexo' },
+    { key: 'legajo', label: 'Legajo', sortable: true, width: '80px' },
+    { key: 'cuil', label: 'CUIL', width: '160px' },
+    { key: 'apellidoNombre', label: 'Apellido y Nombres', sortable: true }, // sin width → toma el espacio restante
+    { key: 'fechaNacimiento', label: 'Fecha de Nacimiento', width: '155px' },
+    { key: 'sexo', label: 'Sexo', width: '110px' },
 ]
+    // { key: 'fechaAlta', label: 'Fecha de Alta', sortable: true },
 
 function handleAgregar() {
     Object.assign(form, emptyForm())
@@ -336,7 +336,7 @@ function handleSubmit() {
                     <div class="flex items-center justify-end">
                         <button
                             @click="handleVerDetalle(row)"
-                            class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                            class="legajo-action-btn"
                             title="Ver detalle"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -361,6 +361,24 @@ function handleSubmit() {
     border: none;
     border-top: 1px solid var(--color-border-input);
     margin: 4px 0 0;
+}
+
+.legajo-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    border: var(--border-width-control) solid var(--color-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.legajo-action-btn:hover {
+    color: var(--color-surface);
+    background: var(--color-primary);
 }
 
 .legajo-section-title {
