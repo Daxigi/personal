@@ -128,59 +128,60 @@ function handleLogout() {
     <div class="min-h-screen bg-app-bg">
         <nav class="bg-white border-b border-gray-200 shadow-sm">
             <div class="mx-auto px-4">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 flex items-center">
-                            <span class="text-lg font-bold text-gray-800">SisPer</span>
-                        </div>
+                <div class="flex items-center h-16">
+                    <!-- Logo (izquierda) -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-lg font-bold text-gray-800">SisPer</span>
+                    </div>
 
-                        <div class="flex ml-8 space-x-1 items-center">
-                            <template v-for="item in navItems" :key="item.name">
-                                <Link
-                                    v-if="item.href"
-                                    :href="item.href"
-                                    class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap"
-                                    :class="isActive(item.href)
+                    <!-- Nav items (centrados) -->
+                    <div class="flex-1 flex justify-center items-center divide-x divide-gray-200/40">
+                        <template v-for="item in navItems" :key="item.name">
+                            <Link
+                                v-if="item.href"
+                                :href="item.href"
+                                class="inline-flex items-center mx-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap"
+                                :class="isActive(item.href)
+                                    ? 'text-blue-600 bg-blue-50'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                            >
+                                {{ item.name }}
+                            </Link>
+
+                            <div v-else class="relative group px-1">
+                                <button
+                                    class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap"
+                                    :class="isSectionActive(item)
                                         ? 'text-blue-600 bg-blue-50'
                                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
                                 >
                                     {{ item.name }}
-                                </Link>
+                                    <svg class="h-4 w-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
 
-                                <div v-else class="relative group">
-                                    <button
-                                        class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap"
-                                        :class="isSectionActive(item)
-                                            ? 'text-blue-600 bg-blue-50'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
-                                    >
-                                        {{ item.name }}
-                                        <svg class="h-4 w-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    <div class="absolute left-0 top-full pt-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50">
-                                        <div class="bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-64 max-h-96 overflow-y-auto">
-                                            <Link
-                                                v-for="child in item.children"
-                                                :key="child.href"
-                                                :href="child.href"
-                                                class="block px-4 py-2 text-sm transition-colors"
-                                                :class="isActive(child.href)
-                                                    ? 'text-blue-600 bg-blue-50'
-                                                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'"
-                                            >
-                                                {{ child.name }}
-                                            </Link>
-                                        </div>
+                                <div class="absolute left-0 top-full pt-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50">
+                                    <div class="bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-64 max-h-96 overflow-y-auto">
+                                        <Link
+                                            v-for="child in item.children"
+                                            :key="child.href"
+                                            :href="child.href"
+                                            class="block px-4 py-2 text-sm transition-colors"
+                                            :class="isActive(child.href)
+                                                ? 'text-blue-600 bg-blue-50'
+                                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'"
+                                        >
+                                            {{ child.name }}
+                                        </Link>
                                     </div>
                                 </div>
-                            </template>
-                        </div>
+                            </div>
+                        </template>
                     </div>
 
-                    <div class="flex items-center space-x-4">
+                    <!-- User (derecha) -->
+                    <div class="flex-shrink-0 flex items-center space-x-4">
                         <span class="text-sm text-gray-600">Admin</span>
                         <button
                             @click="handleLogout"

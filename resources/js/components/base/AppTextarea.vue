@@ -1,70 +1,71 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
-    type?: string
     placeholder?: string
     disabled?: boolean
     readonly?: boolean
     required?: boolean
     id?: string
     name?: string
+    rows?: number
 }>(), {
-    type: 'text',
+    rows: 3,
 })
 
-const model = defineModel<string | number | null>()
+const model = defineModel<string | null>()
 </script>
 
 <template>
-    <input
+    <textarea
         v-model="model"
-        :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
         :required="required"
         :id="id"
         :name="name"
-        class="ai-input"
-        :class="{ 'ai-input--disabled': disabled, 'ai-input--readonly': readonly }"
+        :rows="rows"
+        class="at-textarea"
+        :class="{ 'at-textarea--disabled': disabled, 'at-textarea--readonly': readonly }"
     />
 </template>
 
 <style scoped>
-.ai-input {
+.at-textarea {
     width: 100%;
-    height: var(--control-height);
-    padding: 0 12px;
+    padding: 8px 12px;
     font-size: var(--font-size-md);
+    font-family: inherit;
     color: var(--color-text-default);
     background: var(--color-surface-input);
     border: var(--border-width-control) solid var(--color-border-input);
     border-radius: var(--radius-md);
     outline: none;
     transition: var(--transition-base);
-    line-height: var(--leading-none);
+    resize: vertical;
+    line-height: var(--leading-normal);
 }
 
-.ai-input::placeholder {
+.at-textarea::placeholder {
     color: var(--color-text-placeholder);
 }
 
-.ai-input:hover:not(:disabled):not(:read-only) {
+.at-textarea:hover:not(:disabled):not(:read-only) {
     border-color: var(--color-border-input-hover);
     background: var(--color-surface-input-hover);
 }
 
-.ai-input:focus:not(:disabled):not(:read-only) {
+.at-textarea:focus:not(:disabled):not(:read-only) {
     background: var(--color-surface);
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px var(--shadow-focus-primary);
 }
 
-.ai-input--disabled {
+.at-textarea--disabled {
     opacity: var(--opacity-disabled);
     cursor: not-allowed;
 }
 
-.ai-input--readonly {
+.at-textarea--readonly {
     background: var(--color-surface-muted);
     cursor: default;
 }

@@ -55,15 +55,15 @@ const model = defineModel<string>({ default: '' })
 
 .sf-input {
     width: 100%;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 30px 0 34px;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     color: var(--color-text-default);
     background: var(--color-surface-input);
-    border: 1.5px solid var(--color-border-input);
-    border-radius: 8px;
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-lg);
     outline: none;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
 }
 .sf-input::placeholder {
     color: var(--color-text-placeholder);
@@ -86,20 +86,20 @@ const model = defineModel<string>({ default: '' })
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3b0;
+    color: var(--color-text-placeholder);
     background: none;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     padding: 0;
-    transition: all 0.15s;
+    transition: var(--transition-base);
 }
 .sf-clear svg {
     width: 14px;
     height: 14px;
 }
 .sf-clear:hover {
-    color: #4b5060;
-    background: #e8eaee;
+    color: var(--color-text-secondary);
+    background: var(--color-surface-section);
 }
 </style>

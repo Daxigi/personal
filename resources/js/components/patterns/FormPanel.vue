@@ -25,17 +25,23 @@ const emit = defineEmits<{
             <!-- Actions -->
             <div class="fp-actions">
                 <button
+                    type="submit"
+                    class="fp-btn fp-btn--submit"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="fp-btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M15.5 2H4.5A2.5 2.5 0 002 4.5v11A2.5 2.5 0 004.5 18h11a2.5 2.5 0 002.5-2.5V6.621a2.5 2.5 0 00-.732-1.768l-2.121-2.121A2.5 2.5 0 0013.379 2H15.5zM6 3.5h5v3H6v-3zm4 13a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+                    </svg>
+                    {{ submitLabel ?? 'Grabar' }}
+                </button>
+                <button
                     type="button"
                     class="fp-btn fp-btn--cancel"
                     @click="emit('cancel')"
                 >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="fp-btn-icon fp-btn-icon--green" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 01-.025 1.06L3.622 7.25h10.628a5.25 5.25 0 010 10.5H12a.75.75 0 010-1.5h2.25a3.75 3.75 0 000-7.5H3.622l4.146 3.957a.75.75 0 01-1.036 1.085l-5.5-5.25a.75.75 0 010-1.085l5.5-5.25a.75.75 0 011.06.025z" clip-rule="evenodd"/>
+                    </svg>
                     {{ cancelLabel ?? 'Cancelar' }}
-                </button>
-                <button
-                    type="submit"
-                    class="fp-btn fp-btn--submit"
-                >
-                    {{ submitLabel ?? 'Guardar' }}
                 </button>
             </div>
         </form>
@@ -46,7 +52,7 @@ const emit = defineEmits<{
 .fp-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow:
         0 1px 3px var(--shadow-card-sm),
@@ -59,11 +65,11 @@ const emit = defineEmits<{
 }
 
 .fp-title {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-heading);
     margin: 0;
-    letter-spacing: -0.01em;
+    letter-spacing: var(--tracking-snug);
 }
 
 .fp-body {
@@ -86,15 +92,15 @@ const emit = defineEmits<{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 16px;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 8px;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-lg);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s ease;
-    border: 1.5px solid transparent;
+    transition: var(--transition-base);
+    border: var(--border-width-control) solid transparent;
 }
 
 .fp-btn--cancel {
@@ -117,6 +123,17 @@ const emit = defineEmits<{
     background: var(--color-primary-hover);
     border-color: var(--color-primary-hover);
     box-shadow: 0 2px 6px var(--shadow-primary-md);
+}
+
+.fp-btn-icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.fp-btn-icon--green {
+    color: var(--color-success, #22c55e);
 }
 
 .fp-btn:focus-visible {

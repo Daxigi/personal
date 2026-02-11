@@ -14,6 +14,7 @@ Route::get('/dashboard', function () {
 
 // Personal
 Route::get('/personal/legajos', [LegajoController::class, 'index'])->name('personal.legajos');
+Route::get('/personal/legajos/{legajo}', [LegajoController::class, 'show'])->name('personal.legajos.show');
 Route::get('/personal/contratos', fn () => Inertia::render('Personal/Contratos'))->name('personal.contratos');
 Route::get('/personal/listados', fn () => Inertia::render('Personal/Listados'))->name('personal.listados');
 

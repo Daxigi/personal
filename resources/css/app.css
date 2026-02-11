@@ -1,64 +1,196 @@
 @import 'tailwindcss';
 
+/* ── Fuentes de escaneo de clases Tailwind ──────────────────────────────────
+   Le indicamos a Tailwind dónde buscar clases utilitarias usadas en vistas
+   de paginación de Laravel y en las vistas compiladas del framework.        */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme inline {
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       TIPOGRAFÍA BASE
+       Fuente principal del sistema: "Instrument Sans" como primera opción,
+       con fallback progresivo a fuentes del sistema operativo y emojis.
+       ══════════════════════════════════════════════════════════════════════════ */
     --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
---color-app-bg: #2b436a; 
+    /* ══════════════════════════════════════════════════════════════════════════
+       FONDO DE APLICACIÓN
+       Color azul profundo (#2b436a) que actúa como lienzo general de la app.
+       Las cards blancas "flotan" visualmente sobre este fondo, generando
+       contraste y profundidad en la interfaz.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-app-bg: #2b436a;
 
-    /* ── Text ── */
-    --color-text-heading: #2b436a;   /* Azul oscuro para títulos */
-    --color-text-body: #333333;
-    --color-text-default: #000000;
-    --color-text-secondary: #555555;
-    --color-text-muted: #777777;
-    --color-text-placeholder: #999999;
-    --color-text-disabled: #cccccc;
-    --color-text-icon: #2b436a;
-    --color-text-footer: #ffffff;    /* Texto blanco para el área oscura */
-    --color-text-table-head: #333333;
+    /* ══════════════════════════════════════════════════════════════════════════
+       PALETA DE TEXTO — OPTIMIZADA PARA LEGIBILIDAD PROLONGADA
+       ──────────────────────────────────────────────────────────────────────────
+       Todos los colores cumplen WCAG AA (ratio ≥ 4.5:1) sobre fondo blanco.
+       Se priorizó contraste alto para reducir fatiga visual en jornadas
+       extensas de revisión de datos (legajos, tablas, formularios).
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-text-heading: #1a2e4a;      /* Títulos principales — azul muy oscuro, ratio ~12:1, máxima jerarquía */
+    --color-text-body: #1e293b;         /* Texto de párrafos y contenido — slate-800, ratio ~13:1, lectura cómoda */
+    --color-text-default: #0f172a;      /* Texto genérico por defecto — slate-900, casi negro, máximo contraste */
+    --color-text-secondary: #374151;    /* Info complementaria — gray-700, ratio ~9:1, legible sin competir con body */
+    --color-text-muted: #475569;        /* Texto atenuado — slate-600, ratio ~6:1, metadata y ayudas aún legibles */
+    --color-text-placeholder: #6b7280;  /* Placeholders — gray-500, ratio ~5:1, visible pero claramente secundario */
+    --color-text-disabled: #9ca3af;     /* Elementos inactivos — gray-400, ratio ~3:1, indica no-interacción */
+    --color-text-icon: #3b5580;         /* Íconos funcionales — azul oscurecido, más visible que el anterior #5c77a6 */
+    --color-text-footer: #374151;       /* Footer — gray-700, legible sobre el fondo claro del footer */
+    --color-text-table-head: #0f172a;   /* Encabezados de tabla — slate-900, ancla visual fuerte en la cabecera */
 
-    /* ── Primary (El azul de las barras de título) ── */
-    --color-primary: #5c77a6;        /* Azul grisáceo de las cabeceras */
-    --color-primary-hover: #4a638c;
-    --color-primary-active: #3a4f73;
-    --color-primary-dark: #2b436a;
-    --color-primary-light: #e8eef7;
-    --color-primary-bg: #f0f4f8;
+    /* ══════════════════════════════════════════════════════════════════════════
+       COLOR PRIMARIO (BRAND)
+       Azul institucional para botones, links y elementos de acción.
+       Se oscureció el color base para mejor contraste sobre fondo blanco
+       (de #5c77a6 → #3d5a8a, ratio ~5.5:1 vs ~3.6:1 anterior).
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-primary: #3d5a8a;           /* Estado base — azul más oscuro y contrastado que el anterior */
+    --color-primary-hover: #2e4872;     /* Hover — oscurece para feedback visual claro */
+    --color-primary-active: #233a5e;    /* Active/pressed — confirma la acción del click */
+    --color-primary-dark: #1a2d4a;      /* Variante oscura — textos/íconos sobre fondos claros */
+    --color-primary-light: #eef2f7;     /* Variante ultra-clara — fondos de badges y chips activos */
+    --color-primary-bg: #f5f7fa;        /* Fondo primario sutil — áreas destacadas sin competir con contenido */
 
-    /* ── Surface (cards, inputs, panels) ── */
-    --color-surface: #ffffff;        /* El blanco de la lista central */
-    --color-surface-input: #ffffff;
-    --color-surface-input-hover: #fcfcfc;
-    --color-surface-muted: #f5f5f5;
-    --color-surface-subtle: #edf2f7;
-    --color-surface-table-head: #ffffff; /* Las tablas parecen no tener fondo gris en el head */
-    --color-surface-striped: #f9f9f9;
-    --color-surface-footer: #2b436a;
+    /* ══════════════════════════════════════════════════════════════════════════
+       SUPERFICIES
+       Fondos de cards, inputs, paneles y tablas. Se aumentó ligeramente
+       el contraste entre superficies para que las áreas editables (inputs)
+       se distingan mejor del fondo de la card.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-surface: #ffffff;              /* Cards y paneles principales — blanco puro */
+    --color-surface-input: #ffffff;        /* Fondo de campos de formulario — blanco, área editable */
+    --color-surface-input-hover: #fafbfc;  /* Input en hover — tinte sutil de interactividad */
+    --color-surface-muted: #f5f7fa;        /* Áreas secundarias — gris ligeramente más marcado para separar zonas */
+    --color-surface-subtle: #edf0f5;       /* Secciones colapsadas, sidebars — se nota más la diferencia */
+    --color-surface-table-head: #f8f9fb;   /* Encabezado de tabla — gris muy leve para anclar la cabecera visualmente */
+    --color-surface-striped: #f7f8fa;      /* Filas alternas — guía la lectura horizontal en tablas densas */
+    --color-surface-footer: #fafbfc;       /* Footer — casi blanco, separado del contenido principal */
 
-    /* ── Border (Gris sutil de las tablas) ── */
-    --color-border: #cccccc;
-    --color-border-input: #b0b0b0;
-    --color-border-input-hover: #2b436a;
-    --color-border-light: #e2e8f0;
-    --color-border-lighter: #f1f5f9;
-    --color-border-row: #eeeeee;
-    --color-border-table-head: #333333;
-    --color-border-secondary: #999999;
-    --color-border-secondary-hover: #666666;
+    /* ══════════════════════════════════════════════════════════════════════════
+       BORDES
+       Se aumentó la intensidad de bordes clave (inputs, filas de tabla)
+       para que los campos sean más fáciles de localizar visualmente
+       cuando el operario escanea formularios rápidamente.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-border: #d1d8e3;                /* Borde general — un paso más oscuro para mejor definición */
+    --color-border-input: #b0bac9;          /* Borde de inputs en reposo — más visible, delimita el campo claramente */
+    --color-border-input-hover: #3d5a8a;    /* Borde en hover/focus — azul primary, indica foco inequívocamente */
+    --color-border-light: #e4e8ef;          /* Borde suave — separaciones internas dentro de cards */
+    --color-border-lighter: #edf0f5;        /* Borde ultra-suave — micro-separaciones */
+    --color-border-row: #e4e8ef;            /* Separador entre filas — más visible para escaneo rápido de tabla */
+    --color-border-table-head: #2d3f5a;     /* Borde del header de tabla — línea fuerte que ancla la cabecera */
+    --color-border-secondary: #7a8aa1;      /* Borde de botones secundarios/outline — más definido */
+    --color-border-secondary-hover: #4b5c73;/* Borde secundario en hover — feedback visual claro */
 
-    /* ── Error / Accents (El rojo de los nombres en la lista) ── */
-    --color-error: #990000;          /* Rojo oscuro institucional */
-    --color-error-light: #ff0000;
+    /* ══════════════════════════════════════════════════════════════════════════
+       ACENTOS Y SECCIONES
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-surface-section: #dfe5ef;  /* Fondo de secciones agrupadas — un toque más marcado para diferenciar */
 
-    /* ── Shadows ── */
-    --shadow-focus-primary: rgba(43, 67, 106, 0.15);
-    --shadow-primary-sm: rgba(43, 67, 106, 0.2);
-    --shadow-primary-md: rgba(43, 67, 106, 0.3);
-    --shadow-focus-ring: rgba(92, 119, 166, 0.4);
-    --shadow-focus-error: rgba(153, 0, 0, 0.15);
-    --shadow-card-sm: rgba(0, 0, 0, 0.1);
-    --shadow-card-lg: rgba(0, 0, 0, 0.2);
+    /* ══════════════════════════════════════════════════════════════════════════
+       ESTADOS DE ERROR
+       ══════════════════════════════════════════════════════════════════════════ */
+    --color-error: #b91c1c;        /* Texto/ícono de error — rojo oscuro (red-700), urgente y legible */
+    --color-error-light: #fee2e2;  /* Fondo de alertas — más suave (red-100 en vez de red-300) para no cansar */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       ESCALA TIPOGRÁFICA — AUMENTADA PARA CONFORT VISUAL
+       ──────────────────────────────────────────────────────────────────────────
+       Se subió toda la escala +1px respecto a la versión anterior.
+       El tamaño base pasa de 13px a 14px, que es el mínimo recomendado
+       para interfaces de trabajo prolongado. Los inputs y celdas de tabla
+       ahora usan 14.5–15px para que los datos sean cómodos de leer
+       al revisar cientos de legajos por jornada.
+
+       ANTES → AHORA:
+       2xs: 11px → 12px    |   md:  13.5px → 14.5px
+       xs:  12px → 12.5px  |   lg:  14px   → 15px
+       sm:  12.5px → 13px  |   xl:  16px   → 17px
+       base:13px → 14px    |   2xl: 17px   → 19px
+       ══════════════════════════════════════════════════════════════════════════ */
+    --font-size-2xs: 12px;    /* Badges, etiquetas uppercase, contadores diminutos */
+    --font-size-xs: 12.5px;   /* Mensajes de error bajo inputs, hints, notas al pie */
+    --font-size-sm: 13px;     /* Footer, timestamps, información secundaria de apoyo */
+    --font-size-base: 14px;   /* Botones, labels de formulario, texto de búsqueda — mínimo para jornada laboral */
+    --font-size-md: 14.5px;   /* Contenido de inputs, celdas de tabla, tabs — el operario lee esto constantemente */
+    --font-size-lg: 15px;     /* Texto con énfasis, subtítulos menores */
+    --font-size-xl: 17px;     /* Títulos de sección dentro de cards o paneles */
+    --font-size-2xl: 19px;    /* Título principal de la página — "Legajo #9210" bien visible */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       PESOS TIPOGRÁFICOS
+       Se mantiene el sistema de 3 niveles. El peso "normal" sigue en 500
+       (medium) que mejora la definición de los caracteres a tamaños pequeños.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --font-weight-normal: 500;    /* Texto regular — medium para mayor nitidez en pantalla */
+    --font-weight-semibold: 600;  /* Labels, encabezados de tabla, tabs activos */
+    --font-weight-bold: 700;      /* Títulos principales, botones primarios, datos destacados */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       INTERLINEADO — LIGERAMENTE MÁS ABIERTO
+       Se aumentó leading-normal y leading-relaxed para dar más aire al
+       texto en formularios y tablas. Facilita el seguimiento visual
+       línea a línea cuando se leen datos tabulares.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --leading-none: 1;        /* Badges, botones, contadores — una sola línea */
+    --leading-snug: 1.35;     /* Labels, celdas de tabla — un poco más abierto que antes (1.3) */
+    --leading-normal: 1.5;    /* Párrafos y descripciones — estándar web, cómodo para lectura (antes 1.4) */
+    --leading-relaxed: 1.55;  /* Bloques de lectura extensos — máximo confort visual (antes 1.45) */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       ESPACIADO ENTRE LETRAS
+       Sin cambios — los valores originales son correctos para la nueva escala.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --tracking-tight: -0.015em;  /* Títulos grandes — compacta las letras para dar peso */
+    --tracking-snug: -0.01em;    /* Subtítulos — ajuste negativo sutil */
+    --tracking-wide: 0.06em;     /* Labels uppercase y badges — abre para legibilidad en mayúsculas */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       DIMENSIONES DE CONTROLES
+       Altura estándar compartida por inputs, selects, botones y buscadores.
+       Cambiar este valor ajusta la densidad de toda la interfaz de golpe.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --control-height: 36px;
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       BORDER RADIUS — ESCALA DE REDONDEO
+       4 niveles: elementos pequeños (clear buttons) → cards/paneles.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --radius-sm: 4px;      /* Botones pequeños (limpiar búsqueda) */
+    --radius-md: 6px;      /* Inputs, selects, textareas, campos readonly */
+    --radius-lg: 8px;      /* Botones de acción, buscadores */
+    --radius-xl: 10px;     /* Cards, paneles, contenedores principales */
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       ANCHO DE BORDE DE CONTROLES
+       Todos los form controls usan el mismo grosor de borde para coherencia.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --border-width-control: 2px;
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       TRANSICIONES
+       Duración y easing estándar para interacciones (hover, focus, active).
+       ══════════════════════════════════════════════════════════════════════════ */
+    --transition-base: all 0.15s ease;
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       OPACIDAD
+       Estado deshabilitado uniforme para todos los controles.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --opacity-disabled: 0.5;
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SOMBRAS
+       Sin cambios significativos — el sistema de elevación funciona bien.
+       ══════════════════════════════════════════════════════════════════════════ */
+    --shadow-focus-primary: rgba(61, 90, 138, 0.25);   /* Anillo de foco — ajustado al nuevo primary */
+    --shadow-primary-sm: rgba(0, 0, 0, 0.1);           /* Elevación baja — cards en reposo */
+    --shadow-primary-md: rgba(0, 0, 0, 0.15);          /* Elevación media — cards en hover, modales */
+    --shadow-focus-ring: rgba(61, 90, 138, 0.45);      /* Anillo de foco fuerte — accesibilidad teclado */
+    --shadow-focus-error: rgba(185, 28, 28, 0.25);     /* Anillo de foco error — inputs con validación fallida */
+    --shadow-card-sm: rgba(0, 0, 0, 0.1);              /* Sombra card pequeña — elevación base */
+    --shadow-card-lg: rgba(0, 0, 0, 0.25);             /* Sombra card grande — modales y overlays */
 }

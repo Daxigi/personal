@@ -149,7 +149,7 @@ function selectTab(tab: Tab) {
 .tp-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow:
         0 1px 3px var(--shadow-card-sm),
@@ -166,11 +166,11 @@ function selectTab(tab: Tab) {
 }
 
 .tp-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-heading);
     margin: 0;
-    letter-spacing: -0.015em;
+    letter-spacing: var(--tracking-tight);
 }
 
 .tp-header-actions {
@@ -228,15 +228,15 @@ function selectTab(tab: Tab) {
     align-items: center;
     gap: 6px;
     padding: 12px 16px;
-    font-size: 13.5px;
-    font-weight: 500;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
     color: var(--color-text-muted);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
     position: relative;
     margin-bottom: -1px;
 }
@@ -249,7 +249,7 @@ function selectTab(tab: Tab) {
 .tp-tab--active {
     color: var(--color-primary-hover);
     border-bottom-color: var(--color-primary-hover);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 
 .tp-tab--disabled {
@@ -258,7 +258,7 @@ function selectTab(tab: Tab) {
 }
 
 .tp-tab-label {
-    line-height: 1;
+    line-height: var(--leading-none);
 }
 
 /* ─── Badge ─── */
@@ -269,12 +269,12 @@ function selectTab(tab: Tab) {
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-none);
     border-radius: 9px;
     background: var(--color-border-light);
-    color: #4b5563;
+    color: var(--color-text-secondary);
     font-variant-numeric: tabular-nums;
 }
 
@@ -317,7 +317,7 @@ function selectTab(tab: Tab) {
 @media (max-width: 640px) {
     .tp-header { padding: 14px 16px 0; }
     .tp-tabs-nav { padding: 0 16px; }
-    .tp-tab { padding: 10px 12px; font-size: 13px; }
+    .tp-tab { padding: 10px 12px; font-size: var(--font-size-base); }
     .tp-body--padded { padding: 16px; }
     .tp-footer { padding: 12px 16px; }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, router } from '@inertiajs/vue3'
+import { ref, reactive, computed } from 'vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import DataTable from '@/components/patterns/DataTable.vue'
 import type { Column } from '@/components/patterns/DataTable.vue'
@@ -20,11 +20,103 @@ interface Legajo {
     [key: string]: unknown
 }
 
+interface LegajoEditando {
+    legajo: number
+    tipodoc: number | null
+    documento: number
+    apellido: string
+    nombres: string
+    sexo: string
+    estadoCivil: string
+    fechaNacimiento: string | null
+    localidadNac: string
+    provinciaNac: number | null
+    paisNac: string
+    nacionalizado: string | null
+    domicilio: string
+    localidadDom: string
+    provinciaDom: number | null
+    email: string
+    telefono: string
+    comentarios: string
+    cuit1: number | null
+    cuit2: number | null
+    localizacion: string | null
+}
+
+interface SelectOption {
+    value: string | number
+    label: string
+}
+
 const props = defineProps<{
     legajos: Legajo[]
+    tiposDocumento: SelectOption[]
+    provincias: SelectOption[]
+    legajoEditando?: LegajoEditando
 }>()
 
 const isCreating = ref(false)
+
+const isEditing = computed(() => !!props.legajoEditando)
+const showForm = computed(() => isCreating.value || isEditing.value)
+
+function emptyForm() {
+    return {
+        legajo: null as number | null,
+        tipodoc: null as string | number | null,
+        documento: null as number | null,
+        cuit1: null as number | null,
+        cuit2: null as number | null,
+        apellido: '',
+        nombres: '',
+        sexo: null as string | null,
+        estadoCivil: null as string | null,
+        fechaNacimiento: null as string | null,
+        localidadNac: '',
+        provinciaNac: null as string | number | null,
+        paisNac: '',
+        nacionalizado: null as string | null,
+        domicilio: '',
+        localidadDom: '',
+        provinciaDom: null as string | number | null,
+        email: '',
+        telefono: '',
+        comentarios: '',
+    }
+}
+
+function formFromLegajo(l: LegajoEditando) {
+    return {
+        legajo: l.legajo,
+        tipodoc: l.tipodoc,
+        documento: l.documento,
+        cuit1: l.cuit1,
+        cuit2: l.cuit2,
+        apellido: l.apellido,
+        nombres: l.nombres,
+        sexo: l.sexo || null,
+        estadoCivil: l.estadoCivil || null,
+        fechaNacimiento: l.fechaNacimiento,
+        localidadNac: l.localidadNac,
+        provinciaNac: l.provinciaNac,
+        paisNac: l.paisNac,
+        nacionalizado: l.nacionalizado,
+        domicilio: l.domicilio,
+        localidadDom: l.localidadDom,
+        provinciaDom: l.provinciaDom,
+        email: l.email,
+        telefono: l.telefono,
+        comentarios: l.comentarios,
+    }
+}
+
+const form = reactive(props.legajoEditando ? formFromLegajo(props.legajoEditando) : emptyForm())
+
+const panelTitle = computed(() => {
+    if (isEditing.value) return `Legajo #${props.legajoEditando!.legajo}`
+    return 'Nuevo Legajo'
+})
 
 const tabs = [
     { key: 'datos_personales', label: 'Datos Personales' },
@@ -50,16 +142,27 @@ const columns: Column[] = [
 ]
 
 function handleAgregar() {
+    Object.assign(form, emptyForm())
     isCreating.value = true
 }
 
-function handleCancelCreate() {
-    isCreating.value = false
+function handleVolver() {
+    if (isEditing.value) {
+        router.visit('/personal/legajos')
+    } else {
+        isCreating.value = false
+    }
+}
+
+function handleVerDetalle(row: Record<string, unknown>) {
+    router.visit(`/personal/legajos/${row.legajo}`)
 }
 
 function handleSubmit() {
-    console.log('Guardando legajo...')
-    isCreating.value = false
+    console.log('Guardando legajo...', { ...form })
+    if (!isEditing.value) {
+        isCreating.value = false
+    }
 }
 </script>
 
@@ -69,10 +172,10 @@ function handleSubmit() {
     <AuthenticatedLayout>
         <div class="max-w-5xl mx-auto my-6 px-4 sm:px-6">
 
-            <div v-if="isCreating">
+            <div v-if="showForm">
                 <div class="mb-4">
                     <button
-                        @click="handleCancelCreate"
+                        @click="handleVolver"
                         class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,28 +185,95 @@ function handleSubmit() {
                     </button>
                 </div>
 
-                <TabbedPanel :tabs="tabs" title="Nuevo Legajo">
+                <TabbedPanel :tabs="tabs" :title="panelTitle">
                     <template #datos_personales>
                         <FormPanel
                             title="Datos Básicos"
                             @submit="handleSubmit"
-                            @cancel="handleCancelCreate"
+                            @cancel="handleVolver"
                         >
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField label="Apellido y Nombre" type="text" required />
-                                <FormField label="Documento" type="number" />
-                                <FormField label="CUIL (Prefijo)" type="number" />
-                                <FormField label="CUIL (Sufijo)" type="number" />
-                                <FormField label="Fecha Nacimiento" type="date" />
-                                <FormField
-                                    label="Sexo"
-                                    type="select"
-                                    placeholder="Seleccionar"
-                                    :options="[
-                                        { value: 'M', label: 'Masculino' },
-                                        { value: 'F', label: 'Femenino' },
-                                    ]"
-                                />
+                            <div class="legajo-form">
+                                <!-- Datos generales -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField v-model="form.legajo" label="Legajo" type="text" readonly />
+                                    <FormField :model-value="legajoEditando?.localizacion ?? ''" label="Localización del lugar de trabajo" type="text" readonly />
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <FormField
+                                        v-model="form.tipodoc"
+                                        label="Documento Tipo"
+                                        type="select"
+                                        placeholder="Seleccionar"
+                                        :options="tiposDocumento"
+                                    />
+                                    <FormField v-model="form.cuit1" label="Tipo" type="number" required />
+                                    <FormField v-model="form.documento" label="DNI" type="number" required />
+                                    <FormField v-model="form.cuit2" label="Dig. Verif." type="number" required />
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField v-model="form.apellido" label="Apellido" type="text" required />
+                                    <FormField v-model="form.nombres" label="Nombres" type="text" required />
+                                    <FormField
+                                        v-model="form.sexo"
+                                        label="Genero"
+                                        type="select"
+                                        placeholder="Seleccionar"
+                                        required
+                                        :options="[
+                                            { value: 'Femenino', label: 'Femenino' },
+                                            { value: 'Masculino', label: 'Masculino' },
+                                        ]"
+                                    />
+                                    <FormField
+                                        v-model="form.estadoCivil"
+                                        label="Estado Civil"
+                                        type="select"
+                                        placeholder="Seleccionar"
+                                        :options="[
+                                            { value: 'Soltero', label: 'Soltero' },
+                                            { value: 'Casado', label: 'Casado' },
+                                            { value: 'Separado', label: 'Separado' },
+                                            { value: 'Divorciado', label: 'Divorciado' },
+                                            { value: 'Viudo', label: 'Viudo' },
+                                            { value: 'Concubino', label: 'Concubino' },
+                                        ]"
+                                    />
+                                </div>
+
+                                <!-- Datos de nacimiento -->
+                                <hr class="legajo-divider" />
+                                <h4 class="legajo-section-title">Datos de nacimiento</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField v-model="form.fechaNacimiento" label="Fecha" type="date" required />
+                                    <FormField v-model="form.localidadNac" label="Localidad" type="text" />
+                                    <FormField
+                                        v-model="form.provinciaNac"
+                                        label="Provincia"
+                                        type="select"
+                                        placeholder="Seleccionar"
+                                        :options="provincias"
+                                    />
+                                    <FormField v-model="form.paisNac" label="Pais" type="text" />
+                                    <FormField v-model="form.nacionalizado" label="Nacionalizado" type="date" />
+                                </div>
+
+                                <!-- Domicilio y contacto -->
+                                <hr class="legajo-divider" />
+                                <h4 class="legajo-section-title">Domicilio y contacto</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField v-model="form.domicilio" label="Domicilio" type="textarea" class="md:col-span-2" />
+                                    <FormField v-model="form.localidadDom" label="Localidad" type="text" required />
+                                    <FormField
+                                        v-model="form.provinciaDom"
+                                        label="Provincia"
+                                        type="select"
+                                        placeholder="Seleccionar"
+                                        :options="provincias"
+                                    />
+                                    <FormField v-model="form.email" label="Correo Electrónico" type="text" />
+                                    <FormField v-model="form.telefono" label="Telefono" type="text" />
+                                    <FormField v-model="form.comentarios" label="Comentarios" type="textarea" class="md:col-span-2" />
+                                </div>
                             </div>
                         </FormPanel>
                     </template>
@@ -162,9 +332,13 @@ function handleSubmit() {
                     </span>
                 </template>
 
-                <template #actions>
+                <template #actions="{ row }">
                     <div class="flex items-center justify-end">
-                        <button class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors" title="Ver detalle">
+                        <button
+                            @click="handleVerDetalle(row)"
+                            class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                            title="Ver detalle"
+                        >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -175,3 +349,27 @@ function handleSubmit() {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.legajo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.legajo-divider {
+    border: none;
+    border-top: 1px solid var(--color-border-input);
+    margin: 4px 0 0;
+}
+
+.legajo-section-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-heading);
+    margin: 0;
+    background: var(--color-surface-section);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+}
+</style>

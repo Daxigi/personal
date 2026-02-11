@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppInput from '@/components/base/AppInput.vue'
 import AppSelect from '@/components/base/AppSelect.vue'
+import AppTextarea from '@/components/base/AppTextarea.vue'
 import type { SelectOption } from '@/components/base/AppSelect.vue'
 
 withDefaults(defineProps<{
@@ -10,10 +11,12 @@ withDefaults(defineProps<{
     options?: SelectOption[]
     required?: boolean
     disabled?: boolean
+    readonly?: boolean
     error?: string
     hint?: string
     id?: string
     name?: string
+    rows?: number
 }>(), {
     type: 'text',
 })
@@ -38,6 +41,18 @@ const model = defineModel<string | number | null>()
             :id="id"
             :name="name"
         />
+        <AppTextarea
+            v-else-if="type === 'textarea'"
+            v-model="model"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :readonly="readonly"
+            :required="required"
+            :id="id"
+            :name="name"
+            :rows="rows"
+        />
+        <span v-else-if="readonly" class="ff-readonly">{{ model }}</span>
         <AppInput
             v-else
             v-model="model"
@@ -62,10 +77,10 @@ const model = defineModel<string | number | null>()
 }
 
 .ff-label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
-    line-height: 1;
+    line-height: var(--leading-none);
     padding-bottom: 2px;
 }
 
@@ -75,26 +90,41 @@ const model = defineModel<string | number | null>()
 }
 
 .ff-error {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     color: var(--color-error);
     margin: 0;
-    line-height: 1.3;
+    line-height: var(--leading-snug);
 }
 
 .ff-hint {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     color: var(--color-border-secondary-hover);
     margin: 0;
-    line-height: 1.3;
+    line-height: var(--leading-snug);
 }
 
-/* Error state — tint the inner input/select border */
+.ff-readonly {
+    display: block;
+    width: 100%;
+    min-height: var(--control-height);
+    padding: 0 12px;
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    background: var(--color-surface-muted);
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-md);
+    line-height: var(--control-height);
+}
+
+/* Error state — tint the inner input/select/textarea border */
 .ff-field--error :deep(.ai-input),
-.ff-field--error :deep(.as-select) {
+.ff-field--error :deep(.as-select),
+.ff-field--error :deep(.at-textarea) {
     border-color: var(--color-error-light);
 }
 .ff-field--error :deep(.ai-input):focus,
-.ff-field--error :deep(.as-select):focus {
+.ff-field--error :deep(.as-select):focus,
+.ff-field--error :deep(.at-textarea):focus {
     border-color: var(--color-error);
     box-shadow: 0 0 0 3px var(--shadow-focus-error);
 }

@@ -342,7 +342,7 @@ function goToPage(page: number | string) {
 .dt-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow:
         0 1px 3px var(--shadow-card-sm),
@@ -363,11 +363,11 @@ function goToPage(page: number | string) {
 }
 
 .dt-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-heading);
     margin: 0;
-    letter-spacing: -0.015em;
+    letter-spacing: var(--tracking-tight);
     white-space: nowrap;
 }
 
@@ -399,15 +399,15 @@ function goToPage(page: number | string) {
 
 .dt-search-input {
     width: 210px;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 30px 0 34px;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     color: var(--color-text-default);
     background: var(--color-surface-input);
-    border: 1.5px solid var(--color-border-input);
-    border-radius: 8px;
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-lg);
     outline: none;
-    transition: all 0.2s ease;
+    transition: var(--transition-base);
 }
 .dt-search-input::placeholder { color: var(--color-text-placeholder); }
 .dt-search-input:hover {
@@ -428,18 +428,18 @@ function goToPage(page: number | string) {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3b0;
+    color: var(--color-text-placeholder);
     background: none;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     padding: 0;
-    transition: all 0.15s;
+    transition: var(--transition-base);
 }
 .dt-search-clear svg { width: 14px; height: 14px; }
 .dt-search-clear:hover {
-    color: #4b5060;
-    background: #e8eaee;
+    color: var(--color-text-secondary);
+    background: var(--color-surface-section);
 }
 
 /* ─── Add button ─── */
@@ -447,17 +447,17 @@ function goToPage(page: number | string) {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 16px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-surface);
     background: var(--color-primary);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
     box-shadow: 0 1px 2px var(--shadow-primary-sm);
 }
 .dt-add-btn:hover {
@@ -479,7 +479,7 @@ function goToPage(page: number | string) {
     overflow-x: auto;
     overflow-y: auto;
     border: 1px solid var(--color-border-light);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     max-height: 600px; /* Aprox 10 rows + header */
 }
 
@@ -493,11 +493,11 @@ function goToPage(page: number | string) {
 /* ─── Table head ─── */
 .dt-th {
     padding: 10px 18px;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-table-head);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: var(--tracking-wide);
     background: var(--color-surface-table-head);
     border-bottom: 2px solid var(--color-border-table-head);
     white-space: nowrap;
@@ -518,8 +518,8 @@ function goToPage(page: number | string) {
 
 .dt-th--actions {
     width: 1%;
-    color: #94a3b8;
-    font-weight: 600;
+    color: var(--color-text-placeholder);
+    font-weight: var(--font-weight-semibold);
 }
 
 .dt-th-inner {
@@ -565,14 +565,18 @@ function goToPage(page: number | string) {
 /* ─── Table cells ─── */
 .dt-td {
     padding: 10px 18px;
-    font-size: 13.5px;
+    font-size: var(--font-size-md);
     color: var(--color-text-body);
-    line-height: 1.45;
-    font-weight: 500;
+    line-height: var(--leading-relaxed);
+    font-weight: var(--font-weight-normal);
+    border-right: 1px solid var(--color-border-row);
+}
+.dt-td:last-child {
+    border-right: none;
 }
 
 .dt-td--bold {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .dt-td--actions {
@@ -594,18 +598,18 @@ function goToPage(page: number | string) {
 .dt-empty-icon {
     width: 42px;
     height: 42px;
-    color: #cbd5e1;
+    color: var(--color-text-disabled);
     margin-bottom: 6px;
 }
 .dt-empty-text {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-table-head);
     margin: 0;
 }
 .dt-empty-sub {
-    font-size: 12.5px;
-    color: #94a3b8;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-placeholder);
     margin: 0;
 }
 
@@ -621,9 +625,9 @@ function goToPage(page: number | string) {
 }
 
 .dt-footer-info {
-    font-size: 12.5px;
+    font-size: var(--font-size-sm);
     color: var(--color-text-footer);
-    font-weight: 500;
+    font-weight: var(--font-weight-normal);
     font-variant-numeric: tabular-nums;
 }
 
@@ -641,14 +645,14 @@ function goToPage(page: number | string) {
     min-width: 32px;
     height: 32px;
     padding: 0 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #475569;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
     font-variant-numeric: tabular-nums;
 }
 
@@ -662,7 +666,7 @@ function goToPage(page: number | string) {
     color: var(--color-surface);
     border-color: var(--color-primary);
     box-shadow: 0 1px 3px var(--shadow-focus-ring);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 
 .dt-pg-nav {
@@ -680,8 +684,8 @@ function goToPage(page: number | string) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
-    color: #94a3b8;
+    font-size: var(--font-size-base);
+    color: var(--color-text-placeholder);
     letter-spacing: 1.5px;
 }
 

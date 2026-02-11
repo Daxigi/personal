@@ -29,16 +29,16 @@ withDefaults(defineProps<{
     align-items: center;
     justify-content: center;
     gap: 6px;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 16px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1.5px solid transparent;
-    border-radius: 8px;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border: var(--border-width-control) solid transparent;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s ease;
-    line-height: 1;
+    transition: var(--transition-base);
+    line-height: var(--leading-none);
 }
 
 /* Primary */
@@ -96,7 +96,7 @@ withDefaults(defineProps<{
 
 /* Disabled */
 .ab-btn--disabled {
-    opacity: 0.5;
+    opacity: var(--opacity-disabled);
     cursor: not-allowed;
 }
 </style>

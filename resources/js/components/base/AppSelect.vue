@@ -42,15 +42,15 @@ const model = defineModel<string | number | null>()
 <style scoped>
 .as-select {
     width: 100%;
-    height: 36px;
+    height: var(--control-height);
     padding: 0 32px 0 12px;
-    font-size: 13.5px;
+    font-size: var(--font-size-md);
     color: var(--color-text-default);
     background: var(--color-surface-input);
-    border: 1.5px solid var(--color-border-input);
-    border-radius: 6px;
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-md);
     outline: none;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
@@ -75,7 +75,7 @@ const model = defineModel<string | number | null>()
 }
 
 .as-select--disabled {
-    opacity: 0.5;
+    opacity: var(--opacity-disabled);
     cursor: not-allowed;
 }
 </style>
