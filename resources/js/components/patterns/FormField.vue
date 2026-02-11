@@ -81,7 +81,10 @@ const model = defineModel<string | number | null>()
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
     line-height: var(--leading-none);
-    padding-bottom: 2px;
+    background: var(--color-surface-section);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    align-self: flex-start;
 }
 
 .ff-required {

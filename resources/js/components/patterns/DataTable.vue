@@ -476,7 +476,7 @@ function goToPage(page: number | string) {
 }
 
 .dt-table-scroll {
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
@@ -518,7 +518,7 @@ function goToPage(page: number | string) {
 }
 
 .dt-th--actions {
-    width: 80px;
+    width: 100px;
     color: var(--color-text-placeholder);
     font-weight: var(--font-weight-semibold);
 }

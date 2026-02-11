@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Per001;
 use App\Models\Scm005;
 use App\Models\Scm006;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -51,6 +53,55 @@ class LegajoController extends Controller
                 'localizacion' => $this->getLocalizacion($legajo->id_anexo_ubi),
             ],
         ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tipodoc' => 'nullable|integer',
+            'documento' => 'required|integer|unique:per001,p01docum',
+            'cuit1' => 'required|integer',
+            'cuit2' => 'required|integer',
+            'apellido' => 'required|string|max:100',
+            'nombres' => 'required|string|max:100',
+            'sexo' => 'required|string',
+            'estadoCivil' => 'nullable|string',
+            'fechaNacimiento' => 'required|date',
+            'localidadNac' => 'nullable|string|max:100',
+            'provinciaNac' => 'nullable|integer',
+            'paisNac' => 'nullable|string|max:100',
+            'nacionalizado' => 'nullable|date',
+            'domicilio' => 'nullable|string|max:255',
+            'localidadDom' => 'required|string|max:100',
+            'provinciaDom' => 'nullable|integer',
+            'email' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:100',
+            'comentarios' => 'nullable|string|max:500',
+        ]);
+
+        Per001::create([
+            'p01tipodoc' => $validated['tipodoc'],
+            'p01docum' => $validated['documento'],
+            'p01nrocuil' => $validated['cuit1'],
+            'p01restocuil' => $validated['cuit2'],
+            'p01apyn' => $validated['apellido'] . ',' . $validated['nombres'],
+            'p01sexo' => $validated['sexo'],
+            'p01estcivil' => $validated['estadoCivil'] ?? null,
+            'p01fenac' => $validated['fechaNacimiento'],
+            'p01locnac' => $validated['localidadNac'] ?? null,
+            'p01idpcianac' => $validated['provinciaNac'] ?? null,
+            'p01paisnac' => $validated['paisNac'] ?? null,
+            'p01feadonac' => $validated['nacionalizado'] ?? null,
+            'p01domicilio' => $validated['domicilio'] ?? null,
+            'p01locdom' => $validated['localidadDom'],
+            'p01idpciadom' => $validated['provinciaDom'] ?? null,
+            'p01email' => $validated['email'] ?? null,
+            'telefono' => $validated['telefono'] ?? null,
+            'p01comentarios' => $validated['comentarios'] ?? null,
+            'p01fealta' => now(),
+        ]);
+
+        return redirect()->route('personal.legajos');
     }
 
     private function getLegajosForTable()

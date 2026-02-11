@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, reactive, computed } from 'vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import DataTable from '@/components/patterns/DataTable.vue'
@@ -55,6 +55,10 @@ const props = defineProps<{
     provincias: SelectOption[]
     legajoEditando?: LegajoEditando
 }>()
+
+const page = usePage()
+const errors = computed(() => page.props.errors as Record<string, string>)
+const processing = ref(false)
 
 const isCreating = ref(false)
 
@@ -134,9 +138,9 @@ const tabs = [
 
 const columns: Column[] = [
     { key: 'legajo', label: 'Legajo', sortable: true, width: '80px' },
-    { key: 'cuil', label: 'CUIL', width: '160px' },
+    { key: 'cuil', label: 'CUIL', width: '150px' },
     { key: 'apellidoNombre', label: 'Apellido y Nombres', sortable: true }, // sin width → toma el espacio restante
-    { key: 'fechaNacimiento', label: 'Fecha de Nacimiento', width: '155px' },
+    { key: 'fechaNacimiento', label: 'Fecha de Nacimiento', width: '179px' },
     { key: 'sexo', label: 'Sexo', width: '110px' },
 ]
     // { key: 'fechaAlta', label: 'Fecha de Alta', sortable: true },
@@ -159,10 +163,10 @@ function handleVerDetalle(row: Record<string, unknown>) {
 }
 
 function handleSubmit() {
-    console.log('Guardando legajo...', { ...form })
-    if (!isEditing.value) {
-        isCreating.value = false
-    }
+    processing.value = true
+    router.post('/personal/legajos', { ...form }, {
+        onFinish: () => { processing.value = false },
+    })
 }
 </script>
 
@@ -198,21 +202,33 @@ function handleSubmit() {
                                     <FormField v-model="form.legajo" label="Legajo" type="text" readonly />
                                     <FormField :model-value="legajoEditando?.localizacion ?? ''" label="Localización del lugar de trabajo" type="text" readonly />
                                 </div>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <FormField
-                                        v-model="form.tipodoc"
-                                        label="Documento Tipo"
-                                        type="select"
-                                        placeholder="Seleccionar"
-                                        :options="tiposDocumento"
-                                    />
-                                    <FormField v-model="form.cuit1" label="Tipo" type="number" required />
-                                    <FormField v-model="form.documento" label="DNI" type="number" required />
-                                    <FormField v-model="form.cuit2" label="Dig. Verif." type="number" required />
+                                <div class="legajo-doc-row">
+                                    <div class="legajo-doc-tipo">
+                                        <FormField
+                                            v-model="form.tipodoc"
+                                            label="Documento Tipo"
+                                            type="select"
+                                            placeholder="Seleccionar"
+                                            :options="tiposDocumento"
+                                            :error="errors.tipodoc"
+                                        />
+                                    </div>
+                                    <div class="legajo-cuil-group">
+                                        <span class="legajo-cuil-label">CUIL:</span>
+                                        <div class="legajo-cuil-field legajo-cuil-field--sm">
+                                            <FormField v-model="form.cuit1" label="Tipo" type="number" required :error="errors.cuit1" />
+                                        </div>
+                                        <div class="legajo-cuil-field legajo-cuil-field--lg">
+                                            <FormField v-model="form.documento" label="DNI" type="number" required :error="errors.documento" />
+                                        </div>
+                                        <div class="legajo-cuil-field legajo-cuil-field--sm">
+                                            <FormField v-model="form.cuit2" label="Dig. Verif." type="number" required :error="errors.cuit2" />
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField v-model="form.apellido" label="Apellido" type="text" required />
-                                    <FormField v-model="form.nombres" label="Nombres" type="text" required />
+                                    <FormField v-model="form.apellido" label="Apellido" type="text" required :error="errors.apellido" />
+                                    <FormField v-model="form.nombres" label="Nombres" type="text" required :error="errors.nombres" />
                                     <FormField
                                         v-model="form.sexo"
                                         label="Genero"
@@ -379,6 +395,43 @@ function handleSubmit() {
 .legajo-action-btn:hover {
     color: var(--color-surface);
     background: var(--color-primary);
+}
+
+.legajo-doc-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.legajo-doc-tipo {
+    flex: 1;
+}
+
+.legajo-cuil-group {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--color-surface-section);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+}
+
+.legajo-cuil-label {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-heading);
+    padding-top: 28px;
+    white-space: nowrap;
+}
+
+.legajo-cuil-field--sm {
+    flex: 0 0 80px;
+}
+
+.legajo-cuil-field--lg {
+    flex: 1;
 }
 
 .legajo-section-title {
