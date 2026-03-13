@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, reactive, computed } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import DataTable from '@/components/patterns/DataTable.vue'
 import type { Column } from '@/components/patterns/DataTable.vue'
 import TabbedPanel from '@/components/patterns/TabbedPanel.vue'
 import FormPanel from '@/components/patterns/FormPanel.vue'
 import FormField from '@/components/patterns/FormField.vue'
+import type { PaginatedResponse } from '@/types'
 
 interface Legajo {
     legajo: number
@@ -15,7 +17,6 @@ interface Legajo {
     cuit2: number | null
     apellidoNombre: string
     fechaNacimiento: string | null
-    // fechaAlta: string | null
     sexo: string
     [key: string]: unknown
 }
@@ -50,7 +51,7 @@ interface SelectOption {
 }
 
 const props = defineProps<{
-    legajos: Legajo[]
+    legajos: PaginatedResponse<Legajo>
     tiposDocumento: SelectOption[]
     provincias: SelectOption[]
     legajoEditando?: LegajoEditando
@@ -59,6 +60,45 @@ const props = defineProps<{
 const page = usePage()
 const errors = computed(() => page.props.errors as Record<string, string>)
 const processing = ref(false)
+
+// Server-side filters
+const url = new URL(window.location.href)
+const initialFilters = {
+    search: url.searchParams.get('search') ?? '',
+    column: url.searchParams.get('column') ?? '',
+    dateFrom: url.searchParams.get('dateFrom') ?? '',
+    dateTo: url.searchParams.get('dateTo') ?? '',
+    sortKey: url.searchParams.get('sortKey') ?? '',
+    sortOrder: (url.searchParams.get('sortOrder') ?? 'desc') as 'asc' | 'desc',
+}
+
+const tableLoading = ref(false)
+
+const fetchLegajos = useDebounceFn((filters: {
+    search: string
+    column: string
+    dateFrom: string
+    dateTo: string
+    sortKey: string | null
+    sortOrder: 'asc' | 'desc'
+    page: number
+}) => {
+    const params: Record<string, string | number> = {}
+    if (filters.search) params.search = filters.search
+    if (filters.column) params.column = filters.column
+    if (filters.dateFrom) params.dateFrom = filters.dateFrom
+    if (filters.dateTo) params.dateTo = filters.dateTo
+    if (filters.sortKey) params.sortKey = filters.sortKey
+    if (filters.sortOrder) params.sortOrder = filters.sortOrder
+    if (filters.page > 1) params.page = filters.page
+
+    router.get('/personal/legajos', params, {
+        preserveState: true,
+        preserveScroll: true,
+        onStart: () => { tableLoading.value = true },
+        onFinish: () => { tableLoading.value = false },
+    })
+}, 300)
 
 const isCreating = ref(false)
 
@@ -138,9 +178,10 @@ const tabs = [
 
 const columns: Column[] = [
     { key: 'legajo', label: 'Legajo', sortable: true, width: '80px' },
-    { key: 'cuil', label: 'CUIL', width: '150px' },
-    { key: 'apellidoNombre', label: 'Apellido y Nombres', sortable: true }, // sin width → toma el espacio restante
-    { key: 'fechaNacimiento', label: 'Fecha de Nacimiento', width: '179px' },
+    { key: 'cuil', label: 'CUIL', width: '150px',
+      searchValue: (row) => `${row.cuit1}-${row.documento}-${row.cuit2}` },
+    { key: 'apellidoNombre', label: 'Apellido y Nombres',width: '230px', sortable: true },
+    { key: 'fechaNacimiento', label: 'Fecha de Nac.', width: '150px', type: 'date' },
     { key: 'sexo', label: 'Sexo', width: '110px' },
 ]
     // { key: 'fechaAlta', label: 'Fecha de Alta', sortable: true },
@@ -332,12 +373,25 @@ function handleSubmit() {
                 title="Legajos"
                 add-label="Agregar"
                 :columns="columns"
-                :data="legajos"
+                :data="legajos.data"
                 row-key="legajo"
                 :pagination="true"
                 :items-per-page="50"
-                search-placeholder="Filtrar legajos..."
+                search-placeholder="Filtrar..."
+                :column-filter="true"
+                date-filter-key="fechaNacimiento"
+                :server-side="true"
+                :total-items="legajos.total"
+                :current-page-prop="legajos.current_page"
+                :initial-search="initialFilters.search"
+                :initial-column="initialFilters.column"
+                :initial-date-from="initialFilters.dateFrom"
+                :initial-date-to="initialFilters.dateTo"
+                :initial-sort-key="initialFilters.sortKey"
+                :initial-sort-order="initialFilters.sortOrder"
+                :loading="tableLoading"
                 @add="handleAgregar"
+                @update:filters="fetchLegajos"
             >
                 <template #cell="{ column, row, value }">
                     <span v-if="column.key === 'cuil'">

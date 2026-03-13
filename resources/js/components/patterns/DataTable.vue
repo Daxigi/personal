@@ -8,6 +8,9 @@ export interface Column {
     sortable?: boolean
     width?: string
     bold?: boolean
+    filterable?: boolean
+    type?: 'text' | 'date'
+    searchValue?: (row: Record<string, unknown>) => string
 }
 
 const props = withDefaults(defineProps<{
@@ -21,18 +24,44 @@ const props = withDefaults(defineProps<{
     searchPlaceholder?: string
     addLabel?: string
     striped?: boolean
+    columnFilter?: boolean
+    dateFilterKey?: string
+    // Server-side mode props
+    serverSide?: boolean
+    totalItems?: number
+    currentPageProp?: number
+    initialSearch?: string
+    initialColumn?: string
+    initialDateFrom?: string
+    initialDateTo?: string
+    initialSortKey?: string
+    initialSortOrder?: 'asc' | 'desc'
+    loading?: boolean
 }>(), {
     pagination: false,
     itemsPerPage: 50,
     searchable: true,
     searchPlaceholder: 'Filtrar...',
     striped: true,
+    columnFilter: false,
+    serverSide: false,
+    totalItems: 0,
+    loading: false,
 })
 
 const emit = defineEmits<{
     sort: [column: string]
     search: [query: string]
     add: []
+    'update:filters': [filters: {
+        search: string
+        column: string
+        dateFrom: string
+        dateTo: string
+        sortKey: string | null
+        sortOrder: 'asc' | 'desc'
+        page: number
+    }]
 }>()
 
 defineSlots<{
@@ -43,8 +72,21 @@ defineSlots<{
 }>()
 
 // Sort state
-const sortKey = ref<string | null>(null)
-const sortOrder = ref<'asc' | 'desc'>('asc')
+const sortKey = ref<string | null>(props.initialSortKey ?? null)
+const sortOrder = ref<'asc' | 'desc'>(props.initialSortOrder ?? 'asc')
+
+function emitServerFilters(page?: number) {
+    if (!props.serverSide) return
+    emit('update:filters', {
+        search: searchQuery.value,
+        column: selectedColumn.value,
+        dateFrom: dateFrom.value,
+        dateTo: dateTo.value,
+        sortKey: sortKey.value,
+        sortOrder: sortOrder.value,
+        page: page ?? currentPage.value,
+    })
+}
 
 function handleSort(col: Column) {
     if (!col.sortable) return
@@ -55,6 +97,7 @@ function handleSort(col: Column) {
         sortOrder.value = 'asc'
     }
     emit('sort', col.key)
+    emitServerFilters(1)
 }
 
 function alignClass(align?: string): string {
@@ -70,28 +113,85 @@ function justifyClass(align?: string): string {
 }
 
 // Search
-const searchQuery = ref('')
+const searchQuery = ref(props.initialSearch ?? '')
 
 watch(searchQuery, (val) => {
     emit('search', val)
     currentPage.value = 1
+    emitServerFilters(1)
 })
 
+// Column filter
+const selectedColumn = ref<string>(props.initialColumn ?? '')
+const dateFrom = ref<string>(props.initialDateFrom ?? '')
+const dateTo = ref<string>(props.initialDateTo ?? '')
+
+const filterColumnOptions = computed(() => {
+    const cols = props.columns.filter(c => c.filterable !== false)
+    return [
+        { value: '', label: 'Todas las columnas' },
+        ...cols.map(c => ({ value: c.key, label: c.label }))
+    ]
+})
+
+watch([selectedColumn, dateFrom, dateTo], () => {
+    currentPage.value = 1
+    emitServerFilters(1)
+})
+
+const hasActiveFilters = computed(() => {
+    return searchQuery.value.trim() !== '' || dateFrom.value !== '' || dateTo.value !== ''
+})
+
+function clearAllFilters() {
+    searchQuery.value = ''
+    selectedColumn.value = ''
+    dateFrom.value = ''
+    dateTo.value = ''
+    emitServerFilters(1)
+}
+
 const filteredData = computed(() => {
+    if (props.serverSide) return props.data
+
     let result = props.data
 
     // 1. Filter by search query
     if (props.searchable && searchQuery.value.trim()) {
         const q = searchQuery.value.toLowerCase().trim()
-        result = result.filter(row =>
-            props.columns.some(col => {
-                const val = row[col.key]
-                return val != null && String(val).toLowerCase().includes(q)
-            })
-        )
+
+        if (selectedColumn.value) {
+            const col = props.columns.find(c => c.key === selectedColumn.value)
+            if (col) {
+                result = result.filter(row => {
+                    const val = col.searchValue ? col.searchValue(row) : row[col.key]
+                    return val != null && String(val).toLowerCase().includes(q)
+                })
+            }
+        } else {
+            result = result.filter(row =>
+                props.columns.some(col => {
+                    const val = col.searchValue ? col.searchValue(row) : row[col.key]
+                    return val != null && String(val).toLowerCase().includes(q)
+                })
+            )
+        }
     }
 
-    // 2. Sort by active column
+    // 2. Filter by date range
+    if (props.dateFilterKey && (dateFrom.value || dateTo.value)) {
+        const key = props.dateFilterKey
+        result = result.filter(row => {
+            const val = row[key]
+            if (val == null) return false
+            const dateStr = String(val)
+            if (dateFrom.value && dateStr < dateFrom.value) return false
+            if (dateTo.value && dateStr > dateTo.value) return false
+            return true
+        })
+    }
+
+    // 3. Sort by active column
     if (sortKey.value) {
         const key = sortKey.value
         const dir = sortOrder.value === 'asc' ? 1 : -1
@@ -112,16 +212,23 @@ const filteredData = computed(() => {
 // Pagination
 const currentPage = ref(1)
 
+// Sync currentPage from server
+watch(() => props.currentPageProp, (val) => {
+    if (props.serverSide && val) currentPage.value = val
+})
+
 watch(() => props.data, () => {
-    currentPage.value = 1
+    if (!props.serverSide) currentPage.value = 1
 })
 
 const totalPages = computed(() => {
     if (!props.pagination) return 1
+    if (props.serverSide) return Math.max(1, Math.ceil(props.totalItems / props.itemsPerPage))
     return Math.max(1, Math.ceil(filteredData.value.length / props.itemsPerPage))
 })
 
 const displayedData = computed(() => {
+    if (props.serverSide) return filteredData.value
     if (!props.pagination) return filteredData.value
     const start = (currentPage.value - 1) * props.itemsPerPage
     const end = start + props.itemsPerPage
@@ -129,7 +236,7 @@ const displayedData = computed(() => {
 })
 
 const paginationInfo = computed(() => {
-    const total = filteredData.value.length
+    const total = props.serverSide ? props.totalItems : filteredData.value.length
     if (!props.pagination || total === 0) return ''
     const start = (currentPage.value - 1) * props.itemsPerPage + 1
     const end = Math.min(currentPage.value * props.itemsPerPage, total)
@@ -162,19 +269,49 @@ const visiblePages = computed(() => {
 function goToPage(page: number | string) {
     if (typeof page === 'number' && page >= 1 && page <= totalPages.value) {
         currentPage.value = page
+        emitServerFilters(page)
     }
 }
 </script>
 
 <template>
     <div class="dt-card">
-        <!-- ─── Header: Título + buscador + acciones ─── -->
+        <!-- ─── Header: Título + botón de acción ─── -->
         <div class="dt-header">
-            <div class="dt-header-row">
+            <div class="dt-header-top">
                 <h3 v-if="title" class="dt-title">{{ title }}</h3>
-                <div class="dt-header-controls">
+                <div class="dt-header-actions">
                     <slot name="header-actions" />
-                    <!-- Search -->
+                    <button
+                        v-if="addLabel"
+                        class="dt-add-btn"
+                        @click="emit('add')"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="dt-add-icon">
+                            <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
+                        </svg>
+                        {{ addLabel }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── Barra de filtros ─── -->
+            <div v-if="searchable || dateFilterKey" class="dt-filters">
+                <!-- Búsqueda por texto -->
+                <div class="dt-filters-search">
+                    <select
+                        v-if="columnFilter"
+                        v-model="selectedColumn"
+                        class="dt-column-select"
+                    >
+                        <option
+                            v-for="opt in filterColumnOptions"
+                            :key="opt.value"
+                            :value="opt.value"
+                        >
+                            {{ opt.label }}
+                        </option>
+                    </select>
                     <div v-if="searchable" class="dt-search">
                         <div class="dt-search-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -197,23 +334,38 @@ function goToPage(page: number | string) {
                             </svg>
                         </button>
                     </div>
-                    <!-- Botón Agregar -->
-                    <button
-                        v-if="addLabel"
-                        class="dt-add-btn"
-                        @click="emit('add')"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="dt-add-icon">
-                            <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-                        </svg>
-                        {{ addLabel }}
-                    </button>
                 </div>
+
+                <!-- Filtro por rango de fecha -->
+                <div v-if="dateFilterKey" class="dt-filters-date">
+                    <div class="dt-date-group">
+                        <label class="dt-date-label">Desde</label>
+                        <input v-model="dateFrom" type="date" class="dt-date-input" />
+                    </div>
+                    <span class="dt-date-separator">—</span>
+                    <div class="dt-date-group">
+                        <label class="dt-date-label">Hasta</label>
+                        <input v-model="dateTo" type="date" class="dt-date-input" />
+                    </div>
+                </div>
+
+                <!-- Botón limpiar todos los filtros -->
+                <button
+                    v-if="hasActiveFilters"
+                    class="dt-filters-clear"
+                    @click="clearAllFilters"
+                    title="Limpiar filtros"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                    </svg>
+                    Limpiar
+                </button>
             </div>
         </div>
 
         <!-- ─── Table ─── -->
-        <div class="dt-body">
+        <div class="dt-body" :class="{ 'dt-body--loading': loading }">
             <div class="dt-table-scroll">
                 <table class="dt-table">
                     <thead>
@@ -291,7 +443,7 @@ function goToPage(page: number | string) {
         </div>
 
         <!-- ─── Footer / Pagination ─── -->
-        <div v-if="pagination && filteredData.length > 0" class="dt-footer">
+        <div v-if="pagination && (serverSide ? totalItems > 0 : filteredData.length > 0)" class="dt-footer">
             <span class="dt-footer-info">{{ paginationInfo }}</span>
             <div v-if="totalPages > 1" class="dt-pagination">
                 <button
@@ -352,14 +504,17 @@ function goToPage(page: number | string) {
 /* ─── Header ─── */
 .dt-header {
     padding: 18px 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.dt-header-row {
+/* Fila superior: título + botón agregar */
+.dt-header-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    flex-wrap: wrap;
 }
 
 .dt-title {
@@ -371,11 +526,68 @@ function goToPage(page: number | string) {
     white-space: nowrap;
 }
 
-.dt-header-controls {
+.dt-header-actions {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
+}
+
+/* ─── Barra de filtros ─── */
+.dt-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+}
+
+/* Grupo de búsqueda: select de columna + input */
+.dt-filters-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Grupo de fechas */
+.dt-filters-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Botón limpiar todos los filtros */
+.dt-filters-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-base);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.dt-filters-clear svg {
+    width: 14px;
+    height: 14px;
+}
+.dt-filters-clear:hover {
+    color: var(--color-error);
+    border-color: var(--color-error-light);
+    background: #fef2f2;
 }
 
 /* ─── Search field ─── */
@@ -383,6 +595,8 @@ function goToPage(page: number | string) {
     position: relative;
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 160px;
 }
 
 .dt-search-icon {
@@ -398,12 +612,12 @@ function goToPage(page: number | string) {
 .dt-search-icon svg { width: 15px; height: 15px; }
 
 .dt-search-input {
-    width: 210px;
+    width: 100%;
     height: var(--control-height);
     padding: 0 30px 0 34px;
     font-size: var(--font-size-base);
     color: var(--color-text-default);
-    background: var(--color-surface-input);
+    background: var(--color-surface);
     border: var(--border-width-control) solid var(--color-border-input);
     border-radius: var(--radius-lg);
     outline: none;
@@ -440,6 +654,77 @@ function goToPage(page: number | string) {
 .dt-search-clear:hover {
     color: var(--color-text-secondary);
     background: var(--color-surface-section);
+}
+
+/* ─── Column filter select ─── */
+.dt-column-select {
+    height: var(--control-height);
+    padding: 0 28px 0 12px;
+    font-size: var(--font-size-base);
+    color: var(--color-text-default);
+    background: var(--color-surface);
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-lg);
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-base);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.dt-column-select:hover {
+    border-color: var(--color-border-input-hover);
+    background-color: var(--color-surface-input-hover);
+}
+.dt-column-select:focus {
+    background-color: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
+}
+
+/* ─── Date filter ─── */
+.dt-date-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dt-date-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.dt-date-input {
+    width: 140px;
+    height: var(--control-height);
+    padding: 0 8px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-default);
+    background: var(--color-surface);
+    border: var(--border-width-control) solid var(--color-border-input);
+    border-radius: var(--radius-lg);
+    outline: none;
+    transition: var(--transition-base);
+}
+.dt-date-input:hover {
+    border-color: var(--color-border-input-hover);
+    background: var(--color-surface-input-hover);
+}
+.dt-date-input:focus {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--shadow-focus-primary);
+}
+
+.dt-date-separator {
+    color: var(--color-text-placeholder);
+    font-size: var(--font-size-base);
 }
 
 /* ─── Add button ─── */
@@ -480,14 +765,14 @@ function goToPage(page: number | string) {
     overflow-y: auto;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
-    max-height: 600px; /* Aprox 10 rows + header */
+    max-height: 600px;
 }
 
 /* ─── Table ─── */
 .dt-table {
     width: 100%;
     table-layout: fixed;
-    border-collapse: separate; /* Required for sticky header border */
+    border-collapse: separate;
     border-spacing: 0;
 }
 
@@ -518,7 +803,7 @@ function goToPage(page: number | string) {
 }
 
 .dt-th--actions {
-    width: 100px;
+    width: 80px;
     color: var(--color-text-placeholder);
     font-weight: var(--font-weight-semibold);
 }
@@ -690,28 +975,101 @@ function goToPage(page: number | string) {
     letter-spacing: 1.5px;
 }
 
+/* ─── Loading state ─── */
+.dt-body--loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 /* ─── Responsive ─── */
-@media (max-width: 640px) {
-    .dt-header { padding: 14px 14px 12px; }
-    .dt-header-row {
+@media (max-width: 768px) {
+    /* Header: título y botón siempre en la misma línea */
+    .dt-header {
+        padding: 14px 14px 12px;
+        gap: 10px;
+    }
+
+    /* Filtros: apilados verticalmente pero cada input ocupa el 100% */
+    .dt-filters {
         flex-direction: column;
         align-items: stretch;
+        padding: 10px 12px;
+        gap: 10px;
     }
-    .dt-header-controls {
+
+    .dt-filters-search {
         flex-direction: column;
-        align-items: stretch;
+        gap: 8px;
     }
-    .dt-search-input { width: 100%; }
-    .dt-add-btn { justify-content: center; }
-    .dt-body { padding: 0 10px 10px; }
+
+    .dt-search {
+        min-width: 0;
+    }
+    .dt-search-input {
+        width: 100%;
+    }
+    .dt-column-select {
+        width: 100%;
+    }
+
+    /* Fechas: en fila compacta, no apiladas (caben bien en 320px) */
+    .dt-filters-date {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 6px;
+    }
+    .dt-date-group {
+        flex-direction: column;
+        gap: 2px;
+    }
+    .dt-date-input {
+        width: 100%;
+    }
+
+    /* Tabla: quitar table-layout fixed y permitir scroll horizontal */
+    .dt-body {
+        padding: 0 10px 10px;
+    }
+    .dt-table-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .dt-table {
+        table-layout: auto;
+        min-width: 600px; /* Fuerza scroll horizontal en vez de comprimir */
+    }
     .dt-th, .dt-td {
-        padding-left: 12px;
-        padding-right: 12px;
+        padding: 8px 12px;
+        white-space: nowrap;
     }
+
+    /* Footer */
     .dt-footer {
         flex-direction: column;
-        padding: 12px 14px;
+        padding: 10px 14px;
         gap: 8px;
+        align-items: center;
+    }
+}
+
+/* Pantallas muy chicas (≤ 400px) */
+@media (max-width: 400px) {
+    .dt-header {
+        padding: 12px 10px 10px;
+    }
+    .dt-title {
+        font-size: var(--font-size-xl);
+    }
+    .dt-add-btn {
+        padding: 0 12px;
+        font-size: var(--font-size-sm);
+    }
+    .dt-filters {
+        padding: 8px 10px;
+    }
+    .dt-body {
+        padding: 0 6px 8px;
     }
 }
 </style>

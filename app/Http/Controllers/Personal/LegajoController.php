@@ -14,10 +14,10 @@ use Inertia\Response;
 
 class LegajoController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('Personal/Legajos', [
-            'legajos' => $this->getLegajosForTable(),
+            'legajos' => $this->getLegajosForTable($request),
             'tiposDocumento' => $this->getTiposDocumento(),
             'provincias' => $this->getProvincias(),
         ]);
@@ -26,7 +26,13 @@ class LegajoController extends Controller
     public function show(Per001 $legajo): Response
     {
         return Inertia::render('Personal/Legajos', [
-            'legajos' => $this->getLegajosForTable(),
+            'legajos' => [
+                'data' => [],
+                'total' => 0,
+                'current_page' => 1,
+                'per_page' => 50,
+                'last_page' => 1,
+            ],
             'tiposDocumento' => $this->getTiposDocumento(),
             'provincias' => $this->getProvincias(),
             'legajoEditando' => [
@@ -104,13 +110,68 @@ class LegajoController extends Controller
         return redirect()->route('personal.legajos');
     }
 
-    private function getLegajosForTable()
+    private function getLegajosForTable(Request $request): array
     {
-        return Per001::query()
-            ->select(['p01legajo', 'p01docum', 'p01apyn', 'p01sexo', 'p01fenac', 'p01nrocuil', 'p01restocuil', 'p01fealta'])
-            ->orderBy('p01fealta', 'desc')
-            ->get()
-            ->map(fn (Per001 $row) => [
+        $columnMap = [
+            'legajo'          => 'p01legajo',
+            'apellidoNombre'  => 'p01apyn',
+            'fechaNacimiento' => 'p01fenac',
+            'sexo'            => 'p01sexo',
+        ];
+
+        $search   = $request->input('search');
+        $column   = $request->input('column');
+        $dateFrom = $request->input('dateFrom');
+        $dateTo   = $request->input('dateTo');
+        $sortKey  = $request->input('sortKey');
+        $sortOrder = $request->input('sortOrder', 'desc');
+
+        $query = Per001::query()
+            ->select(['p01legajo', 'p01docum', 'p01apyn', 'p01sexo', 'p01fenac', 'p01nrocuil', 'p01restocuil', 'p01fealta']);
+
+        // Text search filter
+        if ($search) {
+            $term = '%' . mb_strtolower($search) . '%';
+
+            if ($column === 'cuil') {
+                $query->whereRaw(
+                    "CONCAT(p01nrocuil::TEXT, '-', p01docum::TEXT, '-', p01restocuil::TEXT) ILIKE ?",
+                    [$term]
+                );
+            } elseif ($column && isset($columnMap[$column])) {
+                $query->whereRaw("{$columnMap[$column]}::TEXT ILIKE ?", [$term]);
+            } else {
+                $query->where(function ($q) use ($term, $columnMap) {
+                    foreach ($columnMap as $dbCol) {
+                        $q->orWhereRaw("{$dbCol}::TEXT ILIKE ?", [$term]);
+                    }
+                    $q->orWhereRaw(
+                        "CONCAT(p01nrocuil::TEXT, '-', p01docum::TEXT, '-', p01restocuil::TEXT) ILIKE ?",
+                        [$term]
+                    );
+                });
+            }
+        }
+
+        // Date range filter
+        if ($dateFrom) {
+            $query->whereDate('p01fenac', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('p01fenac', '<=', $dateTo);
+        }
+
+        // Sorting
+        if ($sortKey && isset($columnMap[$sortKey])) {
+            $query->orderBy($columnMap[$sortKey], $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->orderBy('p01fealta', 'desc');
+        }
+
+        $paginated = $query->paginate(50);
+
+        return [
+            'data' => collect($paginated->items())->map(fn (Per001 $row) => [
                 'legajo' => $row->p01legajo,
                 'documento' => $row->p01docum,
                 'cuit1' => $row->p01nrocuil,
@@ -119,7 +180,12 @@ class LegajoController extends Controller
                 'fechaNacimiento' => $row->p01fenac?->format('d/m/Y'),
                 'fechaAlta' => $row->p01fealta?->format('d/m/Y'),
                 'sexo' => trim($row->p01sexo),
-            ]);
+            ])->values()->all(),
+            'total' => $paginated->total(),
+            'current_page' => $paginated->currentPage(),
+            'per_page' => $paginated->perPage(),
+            'last_page' => $paginated->lastPage(),
+        ];
     }
 
     private function getTiposDocumento()
